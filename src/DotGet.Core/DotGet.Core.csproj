@@ -4,5 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+    <PackageReference Include="NuGet.Client" Version="4.0.0" />
+    <PackageReference Include="NuGet.Protocol.Core.v3" Version="4.0.0" />
   </ItemGroup>
 </Project>
