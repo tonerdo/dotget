@@ -16,6 +16,6 @@ namespace DotGet.Core.Resolvers
             this.Options = options;
         }
         public abstract bool CanResolve();
-        public abstract string Resolve();
+        public abstract (bool, string) Resolve();
     }
 }
