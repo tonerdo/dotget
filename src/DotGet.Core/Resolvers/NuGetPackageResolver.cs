@@ -20,16 +20,16 @@ namespace DotGet.Core.Resolvers
 {
     internal class NuGetPackageResolver : Resolver
     {
-        private string NuGetFeed;
-        private string NuGetPackagesRoot;
+        private string _nuGetFeed;
+        private string _nuGetPackagesRoot;
 
         public NuGetPackageResolver(string source, ResolverOptions options) : base(source, options)
         {
-            bool customNuGetFeed = Options.TryGetValue("feed", out NuGetFeed);
-            NuGetFeed = customNuGetFeed ? NuGetFeed : "https://api.nuget.org/v3/index.json";
-            NuGetPackagesRoot = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            bool customNuGetFeed = Options.TryGetValue("feed", out _nuGetFeed);
+            _nuGetFeed = customNuGetFeed ? _nuGetFeed : "https://api.nuget.org/v3/index.json";
+            _nuGetPackagesRoot = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
-            NuGetPackagesRoot = Path.Combine(NuGetPackagesRoot, ".nuget", "packages");
+            _nuGetPackagesRoot = Path.Combine(_nuGetPackagesRoot, ".nuget", "packages");
         }
 
         public override bool CanResolve() => !Source.Contains("/") && !Source.Contains(@"\") && !Source.StartsWith(".");
@@ -54,7 +54,7 @@ namespace DotGet.Core.Resolvers
             }
 
             string netcoreappDirectory = package.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
-            string dllDirectory = Path.Combine(NuGetPackagesRoot, BuildPackageDirectoryPath(package.Identity.Id, package.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
+            string dllDirectory = Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(package.Identity.Id, package.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
 
             DirectoryInfo directoryInfo = new DirectoryInfo(dllDirectory);
             FileInfo dll = directoryInfo.GetFiles().FirstOrDefault(f => f.Extension == ".dll");
@@ -72,7 +72,7 @@ namespace DotGet.Core.Resolvers
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
 
-            PackageSource packageSource = new PackageSource(NuGetFeed);
+            PackageSource packageSource = new PackageSource(_nuGetFeed);
             SourceRepository sourceRepository = new SourceRepository(packageSource, providers);
             PackageMetadataResource packageMetadataResource = sourceRepository.GetResource<PackageMetadataResource>();
             IEnumerable<IPackageSearchMetadata> searchMetadata = packageMetadataResource
@@ -108,22 +108,22 @@ namespace DotGet.Core.Resolvers
             byte[] bytes = client.GetByteArrayAsync(requestUri).Result;
             logger.LogSummary("  OK " + requestUri);
 
-            File.WriteAllBytes(Path.Combine(NuGetPackagesRoot, fullName), bytes);
+            File.WriteAllBytes(Path.Combine(_nuGetPackagesRoot, fullName), bytes);
             UnpackNuGetPackage(packageId, version);
         }
 
         private void UnpackNuGetPackage(string packageId, string version)
         {
             string fullName = BuildPackageDirectoryPath(packageId, version) + ".nupkg";
-            string fullPath = Path.Combine(NuGetPackagesRoot, fullName);
-            string unzipPath = Path.Combine(NuGetPackagesRoot, packageId.ToLower(), version);
+            string fullPath = Path.Combine(_nuGetPackagesRoot, fullName);
+            string unzipPath = Path.Combine(_nuGetPackagesRoot, packageId.ToLower(), version);
 
             ZipFile.ExtractToDirectory(fullPath, unzipPath);
             File.Move(fullPath, unzipPath + "/" + fullName);
         }
 
         private bool IsPackageInstalled(string packageId, string version)
-            => Directory.Exists(Path.Combine(NuGetPackagesRoot, BuildPackageDirectoryPath(packageId, version)));
+            => Directory.Exists(Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(packageId, version)));
 
         private string BuildPackageDirectoryPath(string packageId, string version) => Path.Combine(packageId.ToLower(), version);
 
