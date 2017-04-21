@@ -10,7 +10,7 @@ namespace DotGet.Cli
         {
             var app = new CommandLineApplication();
             app.Name = "dotget";
-            app.FullName = "Global .NET Core Tools Installer";
+            app.FullName = ".NET Core Tools Global Installer";
             app.Description = "Install and use command line tools built on .NET Core";
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", "1.0.0");
