@@ -19,6 +19,12 @@ namespace DotGet.Cli
 
             CommandOption verboseOption = app.Option("--verbose", "Enable verbose output", CommandOptionType.NoValue);
 
+            app.OnExecute(() =>
+            {
+                app.ShowHelp();
+                return 0;
+            });
+
             app.Command("install", c =>
             {
                 c.Description = "Installs a .NET Core tool";
@@ -35,9 +41,6 @@ namespace DotGet.Cli
                     return 0;
                 });
             });
-
-            if (args.Length == 0)
-                app.ShowHelp();
 
             return app.Execute(args);
         }
