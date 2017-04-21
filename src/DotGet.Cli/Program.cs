@@ -34,6 +34,12 @@ namespace DotGet.Cli
 
                 c.OnExecute(() =>
                 {
+                    if (string.IsNullOrWhiteSpace(toolArg.Value))
+                    {
+                        logger.LogError("<TOOL> argument is required. Use -h|--help to see help");
+                        return 1;
+                    }
+
                     UpdateLoggerIfVerbose(verboseOption, logger);
                     CommandOptions installOptions = new CommandOptions();
                     InstallCommand installCommand = new InstallCommand(toolArg.Value, installOptions, logger);
