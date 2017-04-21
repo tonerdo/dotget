@@ -9,11 +9,11 @@ namespace DotGet.Core.Commands
 {
     public class InstallCommand
     {
-        private string _source;
+        private string _tool;
         private CommandOptions _options;
-        public InstallCommand(string source, CommandOptions options)
+        public InstallCommand(string tool, CommandOptions options)
         {
-            _source = source;
+            _tool = tool;
             _options = options;
         }
 
@@ -54,11 +54,11 @@ namespace DotGet.Core.Commands
 
         public void Execute()
         {
-            Resolver resolver = new ResolverFactory(_source, BuildResolverOptions()).GetResolver();
+            Resolver resolver = new ResolverFactory(_tool, BuildResolverOptions()).GetResolver();
             (bool success, string dllPath) = resolver.Resolve();
             if (!success)
             {
-                Console.WriteLine("Failed to install {0}!", _source);
+                Console.WriteLine("Failed to install {0}!", _tool);
                 return;
             }
 
@@ -74,11 +74,11 @@ namespace DotGet.Core.Commands
             if (!Directory.Exists(binDirectory))
                 Directory.CreateDirectory(binDirectory);
 
-            File.WriteAllText(Path.Combine(etcDirectory, _source), GetEtcContents(dllPath));
+            File.WriteAllText(Path.Combine(etcDirectory, _tool), GetEtcContents(dllPath));
             File.WriteAllText(Path.Combine(binDirectory, GetBinFilename(dllPath)), GetBinContents(dllPath));
             // TODO: make unix bin file executable
 
-            Console.WriteLine("{0} successfully installed!", _source);
+            Console.WriteLine("{0} successfully installed!", _tool);
         }
     }
 }

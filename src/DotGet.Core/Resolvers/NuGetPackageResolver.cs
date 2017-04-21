@@ -24,7 +24,7 @@ namespace DotGet.Core.Resolvers
         private SourceRepository _sourceRepository;
         private string _nuGetPackagesRoot;
 
-        public NuGetPackageResolver(string source, ResolverOptions options) : base(source, options)
+        public NuGetPackageResolver(string tool, ResolverOptions options) : base(tool, options)
         {
             bool customNuGetFeed = options.TryGetValue("feed", out string nuGetFeed);
             nuGetFeed = customNuGetFeed ? nuGetFeed : "https://api.nuget.org/v3/index.json";
@@ -38,11 +38,11 @@ namespace DotGet.Core.Resolvers
             _nuGetPackagesRoot = Path.Combine(_nuGetPackagesRoot, ".nuget", "packages");
         }
 
-        public override bool CanResolve() => !Source.Contains("/") && !Source.Contains(@"\") && !Source.StartsWith(".");
+        public override bool CanResolve() => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
 
         public override (bool, string) Resolve()
         {
-            IPackageSearchMetadata package = GetPackageFromFeed(Source);
+            IPackageSearchMetadata package = GetPackageFromFeed(Tool);
             if (package == null)
                 return (false, "Package not found!");
 

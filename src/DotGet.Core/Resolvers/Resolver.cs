@@ -5,14 +5,14 @@ namespace DotGet.Core.Resolvers
 {
     internal abstract class Resolver
     {
-        protected string Source { get; private set; }
+        protected string Tool { get; private set; }
         protected ResolverOptions Options { get; private set; }
-        public Resolver(string source, ResolverOptions options)
+        public Resolver(string tool, ResolverOptions options)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            if (tool == null)
+                throw new ArgumentNullException(nameof(tool));
 
-            this.Source = source;
+            this.Tool = tool;
             this.Options = options;
         }
         public abstract bool CanResolve();
