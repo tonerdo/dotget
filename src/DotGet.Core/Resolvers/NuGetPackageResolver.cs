@@ -55,7 +55,7 @@ namespace DotGet.Core.Resolvers
             bool isNetCoreApp = HasNetCoreAppDependencyGroup(package);
             if (!isNetCoreApp)
             {
-                Logger.LogError($"{Tool} does not support framework .NETCoreApp!");
+                Logger.LogError($"{Tool} does not support .NETCoreApp framework!");
                 return (false, null);
             }
 
