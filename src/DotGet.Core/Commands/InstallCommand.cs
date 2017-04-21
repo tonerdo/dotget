@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 using DotGet.Core.Configuration;
+using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
 namespace DotGet.Core.Commands
@@ -11,10 +12,13 @@ namespace DotGet.Core.Commands
     {
         private string _tool;
         private CommandOptions _options;
-        public InstallCommand(string tool, CommandOptions options)
+        private ILogger _logger;
+
+        public InstallCommand(string tool, CommandOptions options, ILogger logger)
         {
             _tool = tool;
             _options = options;
+            _logger = logger;
         }
 
         private ResolverOptions BuildResolverOptions()
@@ -31,7 +35,7 @@ namespace DotGet.Core.Commands
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return $"dotnet {dllPath} %*";
 
-            return $"#!/usr/bin/env bash \n dotnet {dllPath} \"$@\"";
+            return $"#!/usr/bin/env bash \ndotnet {dllPath} \"$@\"";
         }
 
         private string GetBinFilename(string dllPath)
@@ -54,7 +58,7 @@ namespace DotGet.Core.Commands
 
         public void Execute()
         {
-            Resolver resolver = new ResolverFactory(_tool, BuildResolverOptions()).GetResolver();
+            Resolver resolver = new ResolverFactory(_tool, BuildResolverOptions(), _logger).GetResolver();
             (bool success, string dllPath) = resolver.Resolve();
             if (!success)
             {

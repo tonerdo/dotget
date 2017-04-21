@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 using DotGet.Core.Configuration;
+using DotGet.Core.Logging;
 
 using NuGet.Commands;
-using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
@@ -23,8 +23,9 @@ namespace DotGet.Core.Resolvers
     {
         private SourceRepository _sourceRepository;
         private string _nuGetPackagesRoot;
+        private NuGetLogger _nugetLogger;
 
-        public NuGetPackageResolver(string tool, ResolverOptions options) : base(tool, options)
+        public NuGetPackageResolver(string tool, ResolverOptions options, ILogger logger) : base(tool, options, logger)
         {
             bool customNuGetFeed = options.TryGetValue("feed", out string nuGetFeed);
             nuGetFeed = customNuGetFeed ? nuGetFeed : "https://api.nuget.org/v3/index.json";
@@ -36,6 +37,8 @@ namespace DotGet.Core.Resolvers
             _nuGetPackagesRoot = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
             _nuGetPackagesRoot = Path.Combine(_nuGetPackagesRoot, ".nuget", "packages");
+
+            _nugetLogger = new NuGetLogger(Logger);
         }
 
         public override bool CanResolve() => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
@@ -44,15 +47,24 @@ namespace DotGet.Core.Resolvers
         {
             IPackageSearchMetadata package = GetPackageFromFeed(Tool);
             if (package == null)
-                return (false, "Package not found!");
+            {
+                Logger.LogError($"Could not find package {Tool}");
+                return (false, null);
+            }
 
             bool isNetCoreApp = HasNetCoreAppDependencyGroup(package);
             if (!isNetCoreApp)
-                return (false, "Package does not support .NETCoreApp!");
+            {
+                Logger.LogError($"{Tool} does not support framework .NETCoreApp!");
+                return (false, null);
+            }
 
             bool success = InstallNuGetPackage(package.Identity.Id, package.Identity.Version.ToFullString());
             if (!success)
-                return (false, "Package installed failed!");
+            {
+                Logger.LogError("Package installed failed!");
+                return (false, null);
+            }
 
             string netcoreappDirectory = package.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
             string dllDirectory = Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(package.Identity.Id, package.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
@@ -60,7 +72,10 @@ namespace DotGet.Core.Resolvers
             DirectoryInfo directoryInfo = new DirectoryInfo(dllDirectory);
             FileInfo dll = directoryInfo.GetFiles().FirstOrDefault(f => f.Extension == ".dll");
             if (dll == null)
-                return (false, "No executable found in package!");
+            {
+                Logger.LogError("No executable found in package!");
+                return (false, null);
+            }
 
             return (true, dll.FullName);
         }
@@ -72,7 +87,7 @@ namespace DotGet.Core.Resolvers
         {
             PackageMetadataResource packageMetadataResource = _sourceRepository.GetResource<PackageMetadataResource>();
             IEnumerable<IPackageSearchMetadata> searchMetadata = packageMetadataResource
-                .GetMetadataAsync(packageId, true, true, new Logger(), CancellationToken.None).Result;
+                .GetMetadataAsync(packageId, true, true, _nugetLogger, CancellationToken.None).Result;
 
             return version == string.Empty
                 ? searchMetadata.LastOrDefault() : searchMetadata.FirstOrDefault(s => s.Identity.Version.ToFullString() == version);
@@ -95,8 +110,8 @@ namespace DotGet.Core.Resolvers
             spec.RestoreMetadata = new ProjectRestoreMetadata() { ProjectPath = "TempProj.csproj" };
 
             SourceCacheContext sourceCacheContext = new SourceCacheContext { DirectDownload = true, IgnoreFailedSources = false };
-            RestoreCommandProviders restoreCommandProviders = RestoreCommandProviders.Create(_nuGetPackagesRoot, Enumerable.Empty<string>(), new SourceRepository[] { _sourceRepository }, sourceCacheContext, new Logger());
-            RestoreRequest restoreRequest = new RestoreRequest(spec, restoreCommandProviders, sourceCacheContext, new Logger());
+            RestoreCommandProviders restoreCommandProviders = RestoreCommandProviders.Create(_nuGetPackagesRoot, Enumerable.Empty<string>(), new SourceRepository[] { _sourceRepository }, sourceCacheContext, _nugetLogger);
+            RestoreRequest restoreRequest = new RestoreRequest(spec, restoreCommandProviders, sourceCacheContext, _nugetLogger);
             restoreRequest.LockFilePath = Path.Combine(AppContext.BaseDirectory, "project.assets.json");
             restoreRequest.ProjectStyle = ProjectStyle.PackageReference;
             restoreRequest.RestoreOutputPath = _nuGetPackagesRoot;
@@ -106,18 +121,5 @@ namespace DotGet.Core.Resolvers
         }
 
         private string BuildPackageDirectoryPath(string packageId, string version) => Path.Combine(packageId.ToLower(), version);
-
-        private class Logger : ILogger
-        {
-            public void LogDebug(string data) => Console.WriteLine(data);
-            public void LogVerbose(string data) => Console.WriteLine(data);
-            public void LogInformation(string data) => Console.WriteLine(data);
-            public void LogMinimal(string data) => Console.WriteLine(data);
-            public void LogWarning(string data) => Console.WriteLine(data);
-            public void LogError(string data) => Console.WriteLine(data);
-            public void LogSummary(string data) => Console.WriteLine(data);
-            public void LogInformationSummary(string data) => Console.WriteLine(data);
-            public void LogErrorSummary(string data) => Console.WriteLine(data);
-        }
     }
 }

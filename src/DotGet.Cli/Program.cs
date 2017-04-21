@@ -1,4 +1,5 @@
-﻿using DotGet.Core.Commands;
+﻿using DotGet.Cli.Logging;
+using DotGet.Core.Commands;
 using DotGet.Core.Configuration;
 using Microsoft.Extensions.CommandLineUtils;
 
@@ -15,6 +16,8 @@ namespace DotGet.Cli
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", "1.0.0");
 
+            Logger logger = new Logger() { Level = LogLevel.Error | LogLevel.Info | LogLevel.Success | LogLevel.Warning };
+
             app.Command("install", c => {
                 c.Description = "Installs a .NET Core tool";
                 c.HelpOption("-h|--help");
@@ -23,7 +26,7 @@ namespace DotGet.Cli
 
                 c.OnExecute(() => {
                     CommandOptions installOptions = new CommandOptions();
-                    InstallCommand installCommand = new InstallCommand(toolArg.Value, installOptions);
+                    InstallCommand installCommand = new InstallCommand(toolArg.Value, installOptions, logger);
                     installCommand.Execute();
                     return 0;
                 });

@@ -1,5 +1,6 @@
 using System;
 using DotGet.Core.Configuration;
+using DotGet.Core.Logging;
 
 namespace DotGet.Core.Resolvers
 {
@@ -7,13 +8,16 @@ namespace DotGet.Core.Resolvers
     {
         protected string Tool { get; private set; }
         protected ResolverOptions Options { get; private set; }
-        public Resolver(string tool, ResolverOptions options)
+        protected ILogger Logger { get; set; }
+
+        public Resolver(string tool, ResolverOptions options, ILogger logger)
         {
             if (tool == null)
                 throw new ArgumentNullException(nameof(tool));
 
             this.Tool = tool;
             this.Options = options;
+            this.Logger = logger;
         }
         public abstract bool CanResolve();
         public abstract (bool, string) Resolve();
