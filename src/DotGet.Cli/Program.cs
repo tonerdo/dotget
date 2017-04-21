@@ -31,6 +31,7 @@ namespace DotGet.Cli
                 c.HelpOption("-h|--help");
 
                 CommandArgument toolArg = c.Argument("<TOOL>", "The tool to install. Can be a NuGet package");
+                CommandOption feedOption = c.Option("-f|--feed", "Specifies a NuGet package feed", CommandOptionType.SingleValue);
 
                 c.OnExecute(() =>
                 {
@@ -41,7 +42,7 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    CommandOptions installOptions = new CommandOptions();
+                    CommandOptions installOptions = BuildCommandOptions(c);
                     InstallCommand installCommand = new InstallCommand(toolArg.Value, installOptions, logger);
                     installCommand.Execute();
                     return 0;
@@ -49,6 +50,18 @@ namespace DotGet.Cli
             });
 
             return app.Execute(args);
+        }
+
+        static CommandOptions BuildCommandOptions(CommandLineApplication app)
+        {
+            CommandOptions commandOptions = new CommandOptions();
+            foreach (var option in app.Options)
+            {
+                if (option.HasValue())
+                    commandOptions.Add(option.LongName.Replace("--", string.Empty), option.Value());
+            }
+
+            return commandOptions;
         }
 
         static void UpdateLoggerIfVerbose(CommandOption verboseOption, Logger logger)
