@@ -62,7 +62,7 @@ namespace DotGet.Core.Commands
             (bool success, string dllPath) = resolver.Resolve();
             if (!success)
             {
-                Console.WriteLine("Failed to install {0}!", _tool);
+                _logger.LogError($"Failed to install {_tool}!");
                 return;
             }
 
@@ -82,7 +82,7 @@ namespace DotGet.Core.Commands
             File.WriteAllText(Path.Combine(binDirectory, GetBinFilename(dllPath)), GetBinContents(dllPath));
             // TODO: make unix bin file executable
 
-            Console.WriteLine("{0} successfully installed!", _tool);
+            _logger.LogSuccess($"{_tool} successfully installed!");
         }
     }
 }
