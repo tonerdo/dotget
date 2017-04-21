@@ -41,7 +41,7 @@ namespace DotGet.Cli.Logging
 
         public void LogWarning(string data)
         {
-            if (Level.HasFlag(LogLevel.Success))
+            if (Level.HasFlag(LogLevel.Warning))
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine(data);
