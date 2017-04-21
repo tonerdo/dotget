@@ -6,4 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotGet.Core\DotGet.Core.csproj" />
+  </ItemGroup>
 </Project>

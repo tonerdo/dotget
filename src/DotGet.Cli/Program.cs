@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.CommandLineUtils;
+﻿using DotGet.Core.Commands;
+using DotGet.Core.Configuration;
+using Microsoft.Extensions.CommandLineUtils;
 
 namespace DotGet.Cli
 {
@@ -8,10 +10,24 @@ namespace DotGet.Cli
         {
             var app = new CommandLineApplication();
             app.Name = "dotget";
-            app.FullName = "DotGet Global Package Installer";
+            app.FullName = "Global .NET Core Tools Installer";
             app.Description = "Install and use command line tools built on .NET Core";
             app.HelpOption("-h|--help");
             app.VersionOption("-v|--version", "1.0.0");
+
+            app.Command("install", c => {
+                c.Description = "Installs a .NET Core tool";
+                c.HelpOption("-h|--help");
+
+                CommandArgument toolArg = c.Argument("<TOOL>", "The tool to install. Can be a NuGet package");
+
+                c.OnExecute(() => {
+                    CommandOptions installOptions = new CommandOptions();
+                    InstallCommand installCommand = new InstallCommand(toolArg.Value, installOptions);
+                    installCommand.Execute();
+                    return 0;
+                });
+            });
 
             if (args.Length == 0)
                 app.ShowHelp();
