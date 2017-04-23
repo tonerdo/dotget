@@ -32,6 +32,7 @@ namespace DotGet.Cli
 
                 CommandArgument toolArg = c.Argument("<TOOL>", "The tool to install. Can be a NuGet package");
                 CommandOption feedOption = c.Option("-f|--feed", "Specifies a NuGet package feed", CommandOptionType.SingleValue);
+                CommandOption versionOption = c.Option("-v|--version", "Specifies the version of the NuGet package", CommandOptionType.SingleValue);
 
                 c.OnExecute(() =>
                 {

@@ -45,10 +45,15 @@ namespace DotGet.Core.Resolvers
 
         public override (bool, string) Resolve()
         {
-            IPackageSearchMetadata package = GetPackageFromFeed(Tool);
+            bool versionSpecified = Options.TryGetValue("version", out string version);
+            IPackageSearchMetadata package = GetPackageFromFeed(Tool, versionSpecified ? version : "");
             if (package == null)
             {
-                Logger.LogError($"Could not find package {Tool}");
+                string error = $"Could not find package {Tool}";
+                if (versionSpecified)
+                    error += $" with version {version}";
+
+                Logger.LogError(error);
                 return (false, null);
             }
 
