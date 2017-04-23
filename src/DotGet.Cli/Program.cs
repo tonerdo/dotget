@@ -62,7 +62,20 @@ namespace DotGet.Cli
                 });
             });
 
-            return app.Execute(args);
+            try
+            {
+                return app.Execute(args);
+            }
+            catch (CommandParsingException ex)
+            {
+                logger.LogWarning(ex.Message);
+                app.ShowHelp();
+                return 1;
+            }
+            catch (System.Exception)
+            {
+                return 1;
+            }
         }
 
         static CommandOptions BuildCommandOptions(CommandLineApplication app)
