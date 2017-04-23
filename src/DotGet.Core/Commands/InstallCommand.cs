@@ -47,9 +47,9 @@ namespace DotGet.Core.Commands
             return filename;
         }
 
-        private string GetEtcContents(string dllPath)
+        private string GetEtcContents()
         {
-            string contents = $"bin=:={GetBinFilename(dllPath)}\n";
+            string contents = $"tool=:={_tool}\n";
             foreach (var option in _options)
                 contents += $"{option.Key}=:={option.Value}\n";
 
@@ -78,8 +78,9 @@ namespace DotGet.Core.Commands
             if (!Directory.Exists(binDirectory))
                 Directory.CreateDirectory(binDirectory);
 
-            File.WriteAllText(Path.Combine(etcDirectory, _tool), GetEtcContents(dllPath));
-            File.WriteAllText(Path.Combine(binDirectory, GetBinFilename(dllPath)), GetBinContents(dllPath));
+            string binFileName = GetBinFilename(dllPath);
+            File.WriteAllText(Path.Combine(etcDirectory, binFileName), GetEtcContents());
+            File.WriteAllText(Path.Combine(binDirectory, binFileName), GetBinContents(dllPath));
             // TODO: make unix bin file executable
 
             _logger.LogSuccess($"{_tool} successfully installed!");
