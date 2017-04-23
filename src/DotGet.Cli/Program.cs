@@ -49,6 +49,19 @@ namespace DotGet.Cli
                 });
             });
 
+            app.Command("list", c => 
+            {
+                c.Description = "Lists all installed .NET Core tools";
+                c.HelpOption("-h|--help");
+
+                c.OnExecute(() =>
+                {
+                    ListCommand listCommand = new ListCommand(new CommandOptions(), logger);
+                    listCommand.Execute();
+                    return 0;
+                });
+            });
+
             return app.Execute(args);
         }
 
