@@ -21,15 +21,8 @@ namespace DotGet.Core.Commands
 
         public Dictionary<string, string> GetEtc(string path)
         {
-            string[] lines = File.ReadAllLines(path);
-            Dictionary<string, string> etc = new Dictionary<string, string>();
-            foreach (string line in lines)
-            {
-                string[] parts = line.Split("=:=".ToCharArray());
-                etc.Add(parts[0], parts[3]);
-            }
-
-            return etc;
+            string json = File.ReadAllText(path);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
         public void Execute()
