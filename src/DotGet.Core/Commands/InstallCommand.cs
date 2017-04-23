@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -49,11 +50,9 @@ namespace DotGet.Core.Commands
 
         private string BuildEtcContents()
         {
-            string contents = $"tool=:={_tool}\n";
-            foreach (var option in _options)
-                contents += $"{option.Key}=:={option.Value}\n";
-
-            return contents;
+            Dictionary<string, string> etc = _options;
+            etc.Add("tool", _tool);
+            return Newtonsoft.Json.JsonConvert.SerializeObject(etc);
         }
 
         public void Execute()
