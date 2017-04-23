@@ -30,7 +30,7 @@ namespace DotGet.Core.Commands
             return resolverOptions;
         }
 
-        private string GetBinContents(string dllPath)
+        private string BuildBinContents(string dllPath)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return $"dotnet {dllPath} %*";
@@ -38,7 +38,7 @@ namespace DotGet.Core.Commands
             return $"#!/usr/bin/env bash \ndotnet {dllPath} \"$@\"";
         }
 
-        private string GetBinFilename(string dllPath)
+        private string BuildBinFilename(string dllPath)
         {
             string filename = Path.GetFileNameWithoutExtension(dllPath);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -47,7 +47,7 @@ namespace DotGet.Core.Commands
             return filename;
         }
 
-        private string GetEtcContents()
+        private string BuildEtcContents()
         {
             string contents = $"tool=:={_tool}\n";
             foreach (var option in _options)
@@ -78,9 +78,9 @@ namespace DotGet.Core.Commands
             if (!Directory.Exists(binDirectory))
                 Directory.CreateDirectory(binDirectory);
 
-            string binFileName = GetBinFilename(dllPath);
-            File.WriteAllText(Path.Combine(etcDirectory, binFileName), GetEtcContents());
-            File.WriteAllText(Path.Combine(binDirectory, binFileName), GetBinContents(dllPath));
+            string binFileName = BuildBinFilename(dllPath);
+            File.WriteAllText(Path.Combine(etcDirectory, binFileName), BuildEtcContents());
+            File.WriteAllText(Path.Combine(binDirectory, binFileName), BuildBinContents(dllPath));
             // TODO: make unix bin file executable
 
             _logger.LogSuccess($"{_tool} successfully installed!");
