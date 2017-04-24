@@ -63,6 +63,29 @@ namespace DotGet.Cli
                 });
             });
 
+            app.Command("uninstall", c =>
+            {
+                c.Description = "Uninstalls a .NET Core tool";
+                c.HelpOption("-h|--help");
+
+                CommandArgument toolArg = c.Argument("<TOOL>", "The tool to uninstall.");
+
+                c.OnExecute(() =>
+                {
+                    if (string.IsNullOrWhiteSpace(toolArg.Value))
+                    {
+                        logger.LogError("<TOOL> argument is required. Use -h|--help to see help");
+                        return 1;
+                    }
+
+                    UpdateLoggerIfVerbose(verboseOption, logger);
+                    CommandOptions uninstallOptions = BuildCommandOptions(c);
+                    UninstallCommand uninstallCommand = new UninstallCommand(toolArg.Value, uninstallOptions, logger);
+                    uninstallCommand.Execute();
+                    return 0;
+                });
+            });
+
             try
             {
                 return app.Execute(args);
@@ -73,8 +96,9 @@ namespace DotGet.Cli
                 app.ShowHelp();
                 return 1;
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
+                logger.LogError(ex.Message);
                 return 1;
             }
         }

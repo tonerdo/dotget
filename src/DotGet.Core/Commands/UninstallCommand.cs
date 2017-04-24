@@ -16,6 +16,7 @@ namespace DotGet.Core.Commands
 
         public UninstallCommand(string tool, CommandOptions options, ILogger logger)
         {
+            _tool = tool;
             _options = options;
             _logger = logger;
         }
@@ -42,11 +43,12 @@ namespace DotGet.Core.Commands
 
             string etcDirectory = Path.Combine(globalNugetDirectory, "etc");
             string binDirectory = Path.Combine(globalNugetDirectory, "bin");
-            _logger.LogInformation("Uninstalling {_tool}...");
+            _logger.LogInformation($"Uninstalling {_tool}...");
 
             string[] etcFiles = Directory.GetFiles(etcDirectory);
             Dictionary<string, string> etc = null;
             string toolEtc = null;
+
             foreach (string filePath in etcFiles)
             {
                 etc = GetEtc(filePath);
@@ -57,9 +59,12 @@ namespace DotGet.Core.Commands
                 }
             }
 
-            if (etc == null)
-                _logger.LogError("No tool with name: {_tool} is installed");
-            
+            if (toolEtc == null)
+            {
+                _logger.LogError($"No tool with name: {_tool}, is installed");
+                return;
+            }
+
             File.Delete(toolEtc);
             File.Delete(Path.Combine(binDirectory, GetBinExtension()));
             _logger.LogSuccess($"{_tool} uninstalled successfully");
