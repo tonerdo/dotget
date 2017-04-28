@@ -15,20 +15,14 @@ namespace DotGet.Core.Commands
         private CommandOptions _options;
         private ILogger _logger;
 
+        internal ResolutionType ResolutionType;
+
         public InstallCommand(string tool, CommandOptions options, ILogger logger)
         {
             _tool = tool;
             _options = options;
             _logger = logger;
-        }
-
-        private ResolverOptions BuildResolverOptions()
-        {
-            ResolverOptions resolverOptions = new ResolverOptions();
-            foreach (var option in _options)
-                resolverOptions.Add(option.Key, option.Value);
-            
-            return resolverOptions;
+            ResolutionType = ResolutionType.Install;
         }
 
         private string BuildBinContents(string dllPath)
@@ -57,7 +51,7 @@ namespace DotGet.Core.Commands
 
         public void Execute()
         {
-            Resolver resolver = new ResolverFactory(_tool, BuildResolverOptions(), _logger).GetResolver();
+            Resolver resolver = new ResolverFactory(_tool, new ResolverOptions(_options), this.ResolutionType, _logger).GetResolver();
             (bool success, string dllPath) = resolver.Resolve();
             if (!success)
             {

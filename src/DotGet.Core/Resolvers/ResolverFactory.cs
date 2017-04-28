@@ -8,9 +8,9 @@ namespace DotGet.Core.Resolvers
     {
         private Resolver[] _resolvers;
 
-        public ResolverFactory(string tool, ResolverOptions options, ILogger logger)
+        public ResolverFactory(string tool, ResolverOptions options, ResolutionType resolutionType, ILogger logger)
         {
-            _resolvers = new Resolver[] { new NuGetPackageResolver(tool, options, logger) };
+            _resolvers = new Resolver[] { new NuGetPackageResolver(tool, options, resolutionType, logger) };
         }
 
         public Resolver GetResolver() => _resolvers.FirstOrDefault(r => r.CanResolve());

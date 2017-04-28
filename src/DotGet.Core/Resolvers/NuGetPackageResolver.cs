@@ -25,7 +25,7 @@ namespace DotGet.Core.Resolvers
         private string _nuGetPackagesRoot;
         private NuGetLogger _nugetLogger;
 
-        public NuGetPackageResolver(string tool, ResolverOptions options, ILogger logger) : base(tool, options, logger)
+        public NuGetPackageResolver(string tool, ResolverOptions options, ResolutionType resolutionType, ILogger logger) : base(tool, options, resolutionType, logger)
         {
             bool customNuGetFeed = options.TryGetValue("feed", out string nuGetFeed);
             nuGetFeed = customNuGetFeed ? nuGetFeed : "https://api.nuget.org/v3/index.json";
