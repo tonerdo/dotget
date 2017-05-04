@@ -46,7 +46,7 @@ namespace DotGet.Core.Resolvers
         public override (bool, string) Resolve()
         {
             bool versionSpecified = Options.TryGetValue("version", out string version);
-            IPackageSearchMetadata package = GetPackageFromFeed(Tool, versionSpecified ? version : "");
+            IPackageSearchMetadata package = GetPackageFromFeed(Tool, versionSpecified && ResolutionType == ResolutionType.Install ? version : "");
             if (package == null)
             {
                 string error = $"Could not find package {Tool}";

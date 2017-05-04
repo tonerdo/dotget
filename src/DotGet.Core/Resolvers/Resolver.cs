@@ -19,7 +19,7 @@ namespace DotGet.Core.Resolvers
             this.Tool = tool;
             this.Options = options;
             this.Logger = logger;
-            this.ResolutionType = ResolutionType.Install;
+            this.ResolutionType = resolutionType;
         }
         public abstract bool CanResolve();
         public abstract (bool, string) Resolve();

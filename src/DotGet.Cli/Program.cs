@@ -50,6 +50,29 @@ namespace DotGet.Cli
                 });
             });
 
+            app.Command("update", c =>
+            {
+                c.Description = "Updates a .NET Core tool";
+                c.HelpOption("-h|--help");
+
+                CommandArgument toolArg = c.Argument("<TOOL>", "The tool to update.");
+
+                c.OnExecute(() =>
+                {
+                    if (string.IsNullOrWhiteSpace(toolArg.Value))
+                    {
+                        logger.LogError("<TOOL> argument is required. Use -h|--help to see help");
+                        return 1;
+                    }
+
+                    UpdateLoggerIfVerbose(verboseOption, logger);
+                    CommandOptions updateOptions = BuildCommandOptions(c);
+                    UpdateCommand updateCommand = new UpdateCommand(toolArg.Value, updateOptions, logger);
+                    updateCommand.Execute();
+                    return 0;
+                });
+            });
+
             app.Command("list", c => 
             {
                 c.Description = "Lists all installed .NET Core tools";

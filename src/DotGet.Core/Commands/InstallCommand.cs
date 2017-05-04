@@ -45,7 +45,9 @@ namespace DotGet.Core.Commands
         private string BuildEtcContents()
         {
             Dictionary<string, string> etc = _options;
-            etc.Add("tool", _tool);
+            if (!etc.ContainsKey("tool"))
+                etc.Add("tool", _tool);
+
             return Newtonsoft.Json.JsonConvert.SerializeObject(etc);
         }
 
