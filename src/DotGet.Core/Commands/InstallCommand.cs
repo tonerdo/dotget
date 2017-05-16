@@ -78,7 +78,8 @@ namespace DotGet.Core.Commands
             File.WriteAllText(Path.Combine(binDirectory, binFileName), BuildBinContents(dllPath));
             // TODO: make unix bin file executable
 
-            _logger.LogSuccess($"{_tool} successfully installed!");
+            string report = this.ResolutionType == ResolutionType.Install ? "installed" : "updated";
+            _logger.LogSuccess($"{_tool} successfully {report}!");
         }
     }
 }
