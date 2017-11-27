@@ -47,7 +47,7 @@ namespace DotGet.Core.Commands
             {
                 path = resolver.Resolve();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return false;
@@ -57,8 +57,15 @@ namespace DotGet.Core.Commands
             if (!Directory.Exists(bin))
                 Directory.CreateDirectory(bin);
 
-            string filename = BuildBinFilename(path);
-            File.WriteAllText(Path.Combine(bin, filename), BuildBinContents(path));
+            string filename = Path.Combine(bin, BuildBinFilename(path));
+
+            if (File.Exists(filename))
+            {
+                _logger.LogError($"{_tool} is already installed. Try updating it instead!");
+                return false;
+            }
+
+            File.WriteAllText(filename, BuildBinContents(path));
             // TODO: make unix bin file executable
             return true;
         }
