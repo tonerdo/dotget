@@ -9,7 +9,7 @@ using DotGet.Core.Resolvers;
 
 namespace DotGet.Core.Commands
 {
-    public class InstallCommand
+    public class InstallCommand : ICommand
     {
         private string _tool;
         private CommandOptions _options;

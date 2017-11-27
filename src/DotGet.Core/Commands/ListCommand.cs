@@ -8,7 +8,7 @@ using DotGet.Core.Logging;
 
 namespace DotGet.Core.Commands
 {
-    public class ListCommand
+    public class ListCommand : ICommand
     {
         private CommandOptions _options;
         private ILogger _logger;

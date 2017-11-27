@@ -8,7 +8,7 @@ using DotGet.Core.Logging;
 
 namespace DotGet.Core.Commands
 {
-    public class UninstallCommand
+    public class UninstallCommand : ICommand
     {
         private string _tool;
         private CommandOptions _options;
