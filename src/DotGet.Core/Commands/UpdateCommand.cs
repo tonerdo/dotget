@@ -54,7 +54,6 @@ namespace DotGet.Core.Commands
             }
 
             InstallCommand installCommand = new InstallCommand(_tool, _logger);
-            installCommand.ResolutionType = ResolutionType.Update;
             return installCommand.Execute();
         }
     }

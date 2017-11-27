@@ -12,13 +12,10 @@ namespace DotGet.Core.Commands
         private string _tool;
         private ILogger _logger;
 
-        internal ResolutionType ResolutionType;
-
         public InstallCommand(string tool, ILogger logger)
         {
             _tool = tool;
             _logger = logger;
-            ResolutionType = ResolutionType.Install;
         }
 
         private string BuildBinContents(string path)
@@ -37,7 +34,7 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            Resolver resolver = new ResolverFactory(_tool, this.ResolutionType, _logger).GetResolver();
+            Resolver resolver = new ResolverFactory(_tool, ResolutionType.Install, _logger).GetResolver();
             string path = string.Empty;
 
             try
