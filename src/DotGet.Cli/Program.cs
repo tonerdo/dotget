@@ -119,11 +119,6 @@ namespace DotGet.Cli
                 app.ShowHelp();
                 return 1;
             }
-            catch (System.Exception ex)
-            {
-                logger.LogError(ex.Message);
-                return 1;
-            }
         }
 
         static CommandOptions BuildCommandOptions(CommandLineApplication app)
