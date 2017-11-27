@@ -28,20 +28,18 @@ namespace DotGet.Core.Resolvers
         public NuGetPackageResolver(string tool, ResolverOptions options, ResolutionType resolutionType, ILogger logger) : base(tool, options, resolutionType, logger)
         {
             bool customNuGetFeed = options.TryGetValue("feed", out string nuGetFeed);
-            nuGetFeed = customNuGetFeed ? nuGetFeed : "https://api.nuget.org/v3/index.json";
+            nuGetFeed = customNuGetFeed ? nuGetFeed : Globals.NuGetFeed;
 
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
+
             _sourceRepository = new SourceRepository(new PackageSource(nuGetFeed), providers);
-
-            _nuGetPackagesRoot = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
-            _nuGetPackagesRoot = Path.Combine(_nuGetPackagesRoot, ".nuget", "packages");
-
+            _nuGetPackagesRoot = Path.Combine(Globals.GlobalNuGetDirectory, "packages");
             _nugetLogger = new NuGetLogger(Logger);
         }
 
-        public override bool CanResolve() => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
+        public override bool CanResolve()
+            => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
 
         public override string Resolve()
         {
