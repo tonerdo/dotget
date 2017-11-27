@@ -101,8 +101,10 @@ namespace DotGet.Core.Resolvers
         private bool InstallNuGetPackage(string packageId, string version)
         {
             TargetFrameworkInformation tfi = new TargetFrameworkInformation() { FrameworkName = NuGetFramework.ParseFolder("netcoreapp1.1") };
-            LibraryDependency dependency = new LibraryDependency {
-                LibraryRange = new LibraryRange {
+            LibraryDependency dependency = new LibraryDependency
+            {
+                LibraryRange = new LibraryRange
+                {
                     Name = packageId,
                     VersionRange = VersionRange.Parse(version),
                     TypeConstraint = LibraryDependencyTarget.Package
@@ -115,7 +117,15 @@ namespace DotGet.Core.Resolvers
             spec.RestoreMetadata = new ProjectRestoreMetadata() { ProjectPath = "TempProj.csproj" };
 
             SourceCacheContext sourceCacheContext = new SourceCacheContext { DirectDownload = true, IgnoreFailedSources = false };
-            RestoreCommandProviders restoreCommandProviders = RestoreCommandProviders.Create(_nuGetPackagesRoot, Enumerable.Empty<string>(), new SourceRepository[] { _sourceRepository }, sourceCacheContext, _nugetLogger);
+            RestoreCommandProviders restoreCommandProviders = RestoreCommandProviders.Create
+            (
+                _nuGetPackagesRoot,
+                Enumerable.Empty<string>(),
+                new SourceRepository[] { _sourceRepository },
+                sourceCacheContext,
+                new LocalNuspecCache(),
+                _nugetLogger
+            );
             RestoreRequest restoreRequest = new RestoreRequest(spec, restoreCommandProviders, sourceCacheContext, _nugetLogger);
             restoreRequest.LockFilePath = Path.Combine(AppContext.BaseDirectory, "project.assets.json");
             restoreRequest.ProjectStyle = ProjectStyle.PackageReference;
