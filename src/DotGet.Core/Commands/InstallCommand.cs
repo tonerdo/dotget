@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
@@ -25,61 +24,44 @@ namespace DotGet.Core.Commands
             ResolutionType = ResolutionType.Install;
         }
 
-        private string BuildBinContents(string dllPath)
+        private string BuildBinContents(string path)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return $"dotnet {dllPath} %*";
+            if (Globals.IsWindows)
+                return $"dotnet {path} %*";
 
-            return $"#!/usr/bin/env bash \ndotnet {dllPath} \"$@\"";
+            return $"#!/usr/bin/env bash \ndotnet {path} \"$@\"";
         }
 
-        private string BuildBinFilename(string dllPath)
+        private string BuildBinFilename(string path)
         {
-            string filename = Path.GetFileNameWithoutExtension(dllPath);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return filename + ".cmd";
-
-            return filename;
-        }
-
-        private string BuildEtcContents()
-        {
-            Dictionary<string, string> etc = _options;
-            if (!etc.ContainsKey("tool"))
-                etc.Add("tool", _tool);
-
-            return Newtonsoft.Json.JsonConvert.SerializeObject(etc);
+            string filename = Path.GetFileNameWithoutExtension(path);
+            return Globals.IsWindows ? filename + ".cmd" : filename;
         }
 
         public void Execute()
         {
             Resolver resolver = new ResolverFactory(_tool, new ResolverOptions(_options), this.ResolutionType, _logger).GetResolver();
-            (bool success, string dllPath) = resolver.Resolve();
-            if (!success)
+            string path = string.Empty;
+
+            try
             {
-                _logger.LogError($"Failed to install {_tool}!");
+                path = resolver.Resolve();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                // TODO: return false
                 return;
             }
 
-            string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
-            globalNugetDirectory = Path.Combine(globalNugetDirectory, ".nuget");
+            string bin = Path.Combine(Globals.GlobalNuGetDirectory, "bin");
+            if (!Directory.Exists(bin))
+                Directory.CreateDirectory(bin);
 
-            string etcDirectory = Path.Combine(globalNugetDirectory, "etc");
-            if (!Directory.Exists(etcDirectory))
-                Directory.CreateDirectory(etcDirectory);
-
-            string binDirectory = Path.Combine(globalNugetDirectory, "bin");
-            if (!Directory.Exists(binDirectory))
-                Directory.CreateDirectory(binDirectory);
-
-            string binFileName = BuildBinFilename(dllPath);
-            File.WriteAllText(Path.Combine(etcDirectory, binFileName), BuildEtcContents());
-            File.WriteAllText(Path.Combine(binDirectory, binFileName), BuildBinContents(dllPath));
+            string filename = BuildBinFilename(path);
+            File.WriteAllText(Path.Combine(bin, filename), BuildBinContents(path));
             // TODO: make unix bin file executable
-
-            string report = this.ResolutionType == ResolutionType.Install ? "installed" : "updated";
-            _logger.LogSuccess($"{_tool} successfully {report}!");
+            // TODO: return true
         }
     }
 }

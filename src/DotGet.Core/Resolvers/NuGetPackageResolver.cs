@@ -43,50 +43,38 @@ namespace DotGet.Core.Resolvers
 
         public override bool CanResolve() => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
 
-        public override (bool, string) Resolve()
+        public override string Resolve()
         {
-            bool versionSpecified = Options.TryGetValue("version", out string version);
-            IPackageSearchMetadata package = GetPackageFromFeed(Tool, versionSpecified && ResolutionType == ResolutionType.Install ? version : "");
+            bool hasVersion = Options.TryGetValue("version", out string version);
+            IPackageSearchMetadata package = GetPackageFromFeed(Tool, hasVersion && ResolutionType == ResolutionType.Install ? version : "");
             if (package == null)
             {
                 string error = $"Could not find package {Tool}";
-                if (versionSpecified)
+                if (hasVersion)
                     error += $" with version {version}";
 
-                Logger.LogError(error);
-                return (false, null);
+                throw new Exception(error);
             }
 
-            bool isNetCoreApp = HasNetCoreAppDependencyGroup(package);
-            if (!isNetCoreApp)
-            {
-                Logger.LogError($"{Tool} does not support .NETCoreApp framework!");
-                return (false, null);
-            }
+            if (!HasNetCoreAppDependencyGroup(package))
+                throw new Exception($"{Tool} does not support .NETCoreApp framework!");
 
-            bool success = InstallNuGetPackage(package.Identity.Id, package.Identity.Version.ToFullString());
-            if (!success)
-            {
-                Logger.LogError("Package installed failed!");
-                return (false, null);
-            }
+            if (!InstallNuGetPackage(package.Identity.Id, package.Identity.Version.ToFullString()))
+                throw new Exception("Package install failed!");
 
             string netcoreappDirectory = package.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
             string dllDirectory = Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(package.Identity.Id, package.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
 
             DirectoryInfo directoryInfo = new DirectoryInfo(dllDirectory);
-            FileInfo dll = directoryInfo.GetFiles().FirstOrDefault(f => f.Extension == ".dll");
-            if (dll == null)
-            {
-                Logger.LogError("No executable found in package!");
-                return (false, null);
-            }
+            FileInfo assembly = directoryInfo.GetFiles().FirstOrDefault(f => f.Extension == ".dll");
+            if (assembly == null)
+                throw new Exception("No assembly found in package!");
 
-            return (true, dll.FullName);
+            return assembly.FullName;
         }
 
         private bool HasNetCoreAppDependencyGroup(IPackageSearchMetadata package)
-            => package.DependencySets.Where(d => d.TargetFramework.Framework == ".NETCoreApp").Count() > 0;
+            => package.DependencySets.Any(d => d.TargetFramework.Framework == ".NETCoreApp");
 
         private IPackageSearchMetadata GetPackageFromFeed(string packageId, string version = "")
         {
@@ -126,6 +114,7 @@ namespace DotGet.Core.Resolvers
                 new LocalNuspecCache(),
                 _nugetLogger
             );
+
             RestoreRequest restoreRequest = new RestoreRequest(spec, restoreCommandProviders, sourceCacheContext, _nugetLogger);
             restoreRequest.LockFilePath = Path.Combine(AppContext.BaseDirectory, "project.assets.json");
             restoreRequest.ProjectStyle = ProjectStyle.PackageReference;

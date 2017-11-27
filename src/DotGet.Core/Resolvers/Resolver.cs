@@ -22,6 +22,6 @@ namespace DotGet.Core.Resolvers
             this.ResolutionType = resolutionType;
         }
         public abstract bool CanResolve();
-        public abstract (bool, string) Resolve();
+        public abstract string Resolve();
     }
 }
