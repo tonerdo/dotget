@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 
 namespace DotGet.Core.Commands
 {
     public class ListCommand : ICommand
     {
-        private CommandOptions _options;
         private ILogger _logger;
 
-        public ListCommand(CommandOptions options, ILogger logger)
+        public ListCommand(ILogger logger)
         {
-            _options = options;
             _logger = logger;
         }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 
 namespace DotGet.Core.Commands
@@ -11,13 +10,11 @@ namespace DotGet.Core.Commands
     public class UninstallCommand : ICommand
     {
         private string _tool;
-        private CommandOptions _options;
         private ILogger _logger;
 
-        public UninstallCommand(string tool, CommandOptions options, ILogger logger)
+        public UninstallCommand(string tool, ILogger logger)
         {
             _tool = tool;
-            _options = options;
             _logger = logger;
         }
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
@@ -11,15 +10,13 @@ namespace DotGet.Core.Commands
     public class InstallCommand : ICommand
     {
         private string _tool;
-        private CommandOptions _options;
         private ILogger _logger;
 
         internal ResolutionType ResolutionType;
 
-        public InstallCommand(string tool, CommandOptions options, ILogger logger)
+        public InstallCommand(string tool, ILogger logger)
         {
             _tool = tool;
-            _options = options;
             _logger = logger;
             ResolutionType = ResolutionType.Install;
         }
@@ -40,7 +37,7 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            Resolver resolver = new ResolverFactory(_tool, new ResolverOptions(_options), this.ResolutionType, _logger).GetResolver();
+            Resolver resolver = new ResolverFactory(_tool, this.ResolutionType, _logger).GetResolver();
             string path = string.Empty;
 
             try

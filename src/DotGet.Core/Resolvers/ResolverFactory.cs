@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 
 namespace DotGet.Core.Resolvers
@@ -9,9 +8,9 @@ namespace DotGet.Core.Resolvers
     {
         private Resolver[] _resolvers;
 
-        public ResolverFactory(string tool, ResolverOptions options, ResolutionType resolutionType, ILogger logger)
+        public ResolverFactory(string tool, ResolutionType resolutionType, ILogger logger)
         {
-            _resolvers = new Resolver[] { new NuGetPackageResolver(tool, options, resolutionType, logger) };
+            _resolvers = new Resolver[] { new NuGetPackageResolver(tool, resolutionType, logger) };
         }
 
         public Resolver GetResolver()

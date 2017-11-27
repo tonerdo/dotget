@@ -25,15 +25,12 @@ namespace DotGet.Core.Resolvers
         private string _nuGetPackagesRoot;
         private NuGetLogger _nugetLogger;
 
-        public NuGetPackageResolver(string tool, ResolverOptions options, ResolutionType resolutionType, ILogger logger) : base(tool, options, resolutionType, logger)
+        public NuGetPackageResolver(string tool, ResolutionType resolutionType, ILogger logger) : base(tool, resolutionType, logger)
         {
-            bool customNuGetFeed = options.TryGetValue("feed", out string nuGetFeed);
-            nuGetFeed = customNuGetFeed ? nuGetFeed : Globals.NuGetFeed;
-
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
 
-            _sourceRepository = new SourceRepository(new PackageSource(nuGetFeed), providers);
+            _sourceRepository = new SourceRepository(new PackageSource(Globals.NuGetFeed), providers);
             _nuGetPackagesRoot = Path.Combine(Globals.GlobalNuGetDirectory, "packages");
             _nugetLogger = new NuGetLogger(Logger);
         }
@@ -41,27 +38,40 @@ namespace DotGet.Core.Resolvers
         public override bool CanResolve()
             => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
 
+        public override Options BuildOptions()
+        {
+            Options options = new Options();
+            string[] parts = Tool.Split('@');
+
+            options.Add("package", parts[0]);
+            if (parts.Length > 1)
+                options.Add("version", parts[1]);
+            
+            return options;
+        }
+
         public override string Resolve()
         {
             bool hasVersion = Options.TryGetValue("version", out string version);
-            IPackageSearchMetadata package = GetPackageFromFeed(Tool, hasVersion && ResolutionType == ResolutionType.Install ? version : "");
-            if (package == null)
+            string package = Options["package"];
+            IPackageSearchMetadata packageSearchMetadata = GetPackageFromFeed(package, hasVersion && ResolutionType == ResolutionType.Install ? version : "");
+            if (packageSearchMetadata == null)
             {
-                string error = $"Could not find package {Tool}";
+                string error = $"Could not find package {package}";
                 if (hasVersion)
                     error += $" with version {version}";
 
                 throw new Exception(error);
             }
 
-            if (!HasNetCoreAppDependencyGroup(package))
-                throw new Exception($"{Tool} does not support .NETCoreApp framework!");
+            if (!HasNetCoreAppDependencyGroup(packageSearchMetadata))
+                throw new Exception($"{package} does not support .NETCoreApp framework!");
 
-            if (!InstallNuGetPackage(package.Identity.Id, package.Identity.Version.ToFullString()))
+            if (!InstallNuGetPackage(packageSearchMetadata.Identity.Id, packageSearchMetadata.Identity.Version.ToFullString()))
                 throw new Exception("Package install failed!");
 
-            string netcoreappDirectory = package.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
-            string dllDirectory = Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(package.Identity.Id, package.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
+            string netcoreappDirectory = packageSearchMetadata.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
+            string dllDirectory = Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(packageSearchMetadata.Identity.Id, packageSearchMetadata.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
 
             DirectoryInfo directoryInfo = new DirectoryInfo(dllDirectory);
             FileInfo assembly = directoryInfo.GetFiles().FirstOrDefault(f => f.Extension == ".dll");

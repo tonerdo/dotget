@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
@@ -12,13 +11,11 @@ namespace DotGet.Core.Commands
     public class UpdateCommand : ICommand
     {
         private string _tool;
-        private CommandOptions _options;
         private ILogger _logger;
 
-        public UpdateCommand(string tool, CommandOptions options, ILogger logger)
+        public UpdateCommand(string tool, ILogger logger)
         {
             _tool = tool;
-            _options = options;
             _logger = logger;
         }
 
@@ -56,7 +53,7 @@ namespace DotGet.Core.Commands
                 return false;
             }
 
-            InstallCommand installCommand = new InstallCommand(_tool, new CommandOptions(etc), _logger);
+            InstallCommand installCommand = new InstallCommand(_tool, _logger);
             installCommand.ResolutionType = ResolutionType.Update;
             return installCommand.Execute();
         }

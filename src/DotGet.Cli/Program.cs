@@ -1,6 +1,5 @@
 ﻿using DotGet.Cli.Logging;
 using DotGet.Core.Commands;
-using DotGet.Core.Configuration;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace DotGet.Cli
@@ -31,8 +30,6 @@ namespace DotGet.Cli
                 c.HelpOption("-h|--help");
 
                 CommandArgument toolArg = c.Argument("<TOOL>", "The tool to install. Can be a NuGet package");
-                CommandOption feedOption = c.Option("-f|--feed", "Specifies a NuGet package feed", CommandOptionType.SingleValue);
-                CommandOption versionOption = c.Option("-v|--version", "Specifies the version of the NuGet package", CommandOptionType.SingleValue);
 
                 c.OnExecute(() =>
                 {
@@ -43,8 +40,7 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    CommandOptions installOptions = BuildCommandOptions(c);
-                    InstallCommand installCommand = new InstallCommand(toolArg.Value, installOptions, logger);
+                    InstallCommand installCommand = new InstallCommand(toolArg.Value, logger);
                     installCommand.Execute();
                     return 0;
                 });
@@ -66,8 +62,7 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    CommandOptions updateOptions = BuildCommandOptions(c);
-                    UpdateCommand updateCommand = new UpdateCommand(toolArg.Value, updateOptions, logger);
+                    UpdateCommand updateCommand = new UpdateCommand(toolArg.Value, logger);
                     updateCommand.Execute();
                     return 0;
                 });
@@ -80,7 +75,7 @@ namespace DotGet.Cli
 
                 c.OnExecute(() =>
                 {
-                    ListCommand listCommand = new ListCommand(new CommandOptions(), logger);
+                    ListCommand listCommand = new ListCommand(logger);
                     listCommand.Execute();
                     return 0;
                 });
@@ -102,8 +97,7 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    CommandOptions uninstallOptions = BuildCommandOptions(c);
-                    UninstallCommand uninstallCommand = new UninstallCommand(toolArg.Value, uninstallOptions, logger);
+                    UninstallCommand uninstallCommand = new UninstallCommand(toolArg.Value, logger);
                     uninstallCommand.Execute();
                     return 0;
                 });
@@ -119,18 +113,6 @@ namespace DotGet.Cli
                 app.ShowHelp();
                 return 1;
             }
-        }
-
-        static CommandOptions BuildCommandOptions(CommandLineApplication app)
-        {
-            CommandOptions commandOptions = new CommandOptions();
-            foreach (var option in app.Options)
-            {
-                if (option.HasValue())
-                    commandOptions.Add(option.LongName.Replace("--", string.Empty), option.Value());
-            }
-
-            return commandOptions;
         }
 
         static void UpdateLoggerIfVerbose(CommandOption verboseOption, Logger logger)
