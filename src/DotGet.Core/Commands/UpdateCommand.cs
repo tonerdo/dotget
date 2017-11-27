@@ -28,7 +28,7 @@ namespace DotGet.Core.Commands
             return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
-        public void Execute()
+        public bool Execute()
         {
             string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
@@ -53,12 +53,12 @@ namespace DotGet.Core.Commands
             if (toolEtc == null)
             {
                 _logger.LogError($"No tool with name: {_tool}, is installed");
-                return;
+                return false;
             }
 
             InstallCommand installCommand = new InstallCommand(_tool, new CommandOptions(etc), _logger);
             installCommand.ResolutionType = ResolutionType.Update;
-            installCommand.Execute();
+            return installCommand.Execute();
         }
     }
 }

@@ -35,7 +35,7 @@ namespace DotGet.Core.Commands
             return string.Empty;
         }
 
-        public void Execute()
+        public bool Execute()
         {
             string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
@@ -62,12 +62,13 @@ namespace DotGet.Core.Commands
             if (toolEtc == null)
             {
                 _logger.LogError($"No tool with name: {_tool}, is installed");
-                return;
+                return false;
             }
 
             File.Delete(toolEtc);
             File.Delete(Path.Combine(binDirectory, GetBinExtension()));
             _logger.LogSuccess($"{_tool} uninstalled successfully");
+            return true;
         }
     }
 }

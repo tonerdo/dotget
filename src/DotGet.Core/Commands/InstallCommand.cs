@@ -38,7 +38,7 @@ namespace DotGet.Core.Commands
             return Globals.IsWindows ? filename + ".cmd" : filename;
         }
 
-        public void Execute()
+        public bool Execute()
         {
             Resolver resolver = new ResolverFactory(_tool, new ResolverOptions(_options), this.ResolutionType, _logger).GetResolver();
             string path = string.Empty;
@@ -50,8 +50,7 @@ namespace DotGet.Core.Commands
             catch (System.Exception ex)
             {
                 _logger.LogError(ex.Message);
-                // TODO: return false
-                return;
+                return false;
             }
 
             string bin = Path.Combine(Globals.GlobalNuGetDirectory, "bin");
@@ -61,7 +60,7 @@ namespace DotGet.Core.Commands
             string filename = BuildBinFilename(path);
             File.WriteAllText(Path.Combine(bin, filename), BuildBinContents(path));
             // TODO: make unix bin file executable
-            // TODO: return true
+            return true;
         }
     }
 }

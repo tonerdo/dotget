@@ -25,7 +25,7 @@ namespace DotGet.Core.Commands
             return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
-        public void Execute()
+        public bool Execute()
         {
             string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
@@ -41,6 +41,8 @@ namespace DotGet.Core.Commands
                 Dictionary<string, string> etc = GetEtc(filePath);
                 _logger.LogInformation(etc["tool"] + " => " + bin);
             }
+
+            return true;
         }
     }
 }
