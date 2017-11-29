@@ -8,12 +8,12 @@ using DotGet.Core.Resolvers;
 
 namespace DotGet.Core.Commands
 {
-    public class UpdateCommand : ICommand
+    public class UpgradeCommand : ICommand
     {
         private string _tool;
         private ILogger _logger;
 
-        public UpdateCommand(string tool, ILogger logger)
+        public UpgradeCommand(string tool, ILogger logger)
         {
             _tool = tool;
             _logger = logger;

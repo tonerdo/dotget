@@ -46,9 +46,9 @@ namespace DotGet.Cli
                 });
             });
 
-            app.Command("update", c =>
+            app.Command("upgrade", c =>
             {
-                c.Description = "Updates a .NET Core tool";
+                c.Description = "Upgrades a .NET Core tool";
                 c.HelpOption("-h|--help");
 
                 CommandArgument toolArg = c.Argument("<TOOL>", "The tool to update.");
@@ -62,8 +62,8 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    UpdateCommand updateCommand = new UpdateCommand(toolArg.Value, logger);
-                    updateCommand.Execute();
+                    UpgradeCommand upgradeCommand = new UpgradeCommand(toolArg.Value, logger);
+                    upgradeCommand.Execute();
                     return 0;
                 });
             });
