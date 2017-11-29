@@ -19,8 +19,7 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            string bin = Path.Combine(Globals.GlobalNuGetDirectory, "bin");
-            string[] files = Directory.GetFiles(bin);
+            string[] files = Directory.GetFiles(Globals.GlobalBinDirectory);
 
             if (files.Length == 0)
             {

@@ -35,8 +35,7 @@ namespace DotGet.Core.Commands
                 return false;
             }
 
-            string bin = Path.Combine(Globals.GlobalNuGetDirectory, "bin");
-            string filename = Path.Combine(bin, CommandHelper.BuildBinFilename(path));
+            string filename = Path.Combine(Globals.GlobalBinDirectory, CommandHelper.BuildBinFilename(path));
 
             if (!File.Exists(filename))
             {
