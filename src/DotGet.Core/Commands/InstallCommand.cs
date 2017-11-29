@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
@@ -16,20 +17,6 @@ namespace DotGet.Core.Commands
         {
             _tool = tool;
             _logger = logger;
-        }
-
-        private string BuildBinContents(string path)
-        {
-            if (Globals.IsWindows)
-                return $"dotnet {path} %*";
-
-            return $"#!/usr/bin/env bash \ndotnet {path} \"$@\"";
-        }
-
-        private string BuildBinFilename(string path)
-        {
-            string filename = Path.GetFileNameWithoutExtension(path);
-            return Globals.IsWindows ? filename + ".cmd" : filename;
         }
 
         public bool Execute()
@@ -51,7 +38,7 @@ namespace DotGet.Core.Commands
             if (!Directory.Exists(bin))
                 Directory.CreateDirectory(bin);
 
-            string filename = Path.Combine(bin, BuildBinFilename(path));
+            string filename = Path.Combine(bin, CommandHelper.BuildBinFilename(path));
 
             if (File.Exists(filename))
             {
@@ -59,7 +46,7 @@ namespace DotGet.Core.Commands
                 return false;
             }
 
-            File.WriteAllText(filename, BuildBinContents(path));
+            File.WriteAllText(filename, CommandHelper.BuildBinContents(path));
             // TODO: make unix bin file executable
             return true;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
@@ -19,42 +20,32 @@ namespace DotGet.Core.Commands
             _logger = logger;
         }
 
-        public Dictionary<string, string> GetEtc(string path)
-        {
-            string json = File.ReadAllText(path);
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-        }
-
         public bool Execute()
         {
-            string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
-            globalNugetDirectory = Path.Combine(globalNugetDirectory, ".nuget");
+            Resolver resolver = new ResolverFactory(_tool, ResolutionType.Upgrade, _logger).GetResolver();
+            string path = string.Empty;
 
-            string etcDirectory = Path.Combine(globalNugetDirectory, "etc");
-
-            string[] etcFiles = Directory.GetFiles(etcDirectory);
-            Dictionary<string, string> etc = null;
-            string toolEtc = null;
-
-            foreach (string filePath in etcFiles)
+            try
             {
-                etc = GetEtc(filePath);
-                if (etc["tool"] == _tool)
-                {
-                    toolEtc = filePath;
-                    break;
-                }
+                path = resolver.Resolve();
             }
-
-            if (toolEtc == null)
+            catch (Exception ex)
             {
-                _logger.LogError($"No tool with name: {_tool}, is installed");
+                _logger.LogError(ex.Message);
                 return false;
             }
 
-            InstallCommand installCommand = new InstallCommand(_tool, _logger);
-            return installCommand.Execute();
+            string bin = Path.Combine(Globals.GlobalNuGetDirectory, "bin");
+            string filename = Path.Combine(bin, CommandHelper.BuildBinFilename(path));
+
+            if (!File.Exists(filename))
+            {
+                _logger.LogError($"{_tool} is not installed.");
+                return false;
+            }
+
+            File.WriteAllText(filename, CommandHelper.BuildBinContents(path));
+            return true;
         }
     }
 }
