@@ -96,7 +96,7 @@ namespace DotGet.Core.Resolvers
 
         private bool InstallNuGetPackage(string packageId, string version)
         {
-            TargetFrameworkInformation tfi = new TargetFrameworkInformation() { FrameworkName = NuGetFramework.ParseFolder("netcoreapp1.1") };
+            TargetFrameworkInformation tfi = new TargetFrameworkInformation() { FrameworkName = NuGetFramework.ParseFolder("netcoreapp2.0") };
             LibraryDependency dependency = new LibraryDependency
             {
                 LibraryRange = new LibraryRange
