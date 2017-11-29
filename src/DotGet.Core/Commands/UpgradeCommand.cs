@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using DotGet.Core.Exceptions;
 using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
@@ -29,7 +30,7 @@ namespace DotGet.Core.Commands
             {
                 path = resolver.Resolve();
             }
-            catch (Exception ex)
+            catch (ResolverException ex)
             {
                 _logger.LogError(ex.Message);
                 return false;

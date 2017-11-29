@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 using DotGet.Core.Configuration;
+using DotGet.Core.Exceptions;
 using DotGet.Core.Logging;
 
 using NuGet.Commands;
@@ -78,14 +79,14 @@ namespace DotGet.Core.Resolvers
                 if (hasVersion)
                     error += $" with version {version}";
 
-                throw new Exception(error);
+                throw new ResolverException(error);
             }
 
             if (!HasNetCoreAppDependencyGroup(packageSearchMetadata))
-                throw new Exception($"{package} does not support .NETCoreApp framework!");
+                throw new ResolverException($"{package} does not support .NETCoreApp framework!");
 
             if (!RestoreNuGetPackage(packageSearchMetadata.Identity.Id, packageSearchMetadata.Identity.Version.ToFullString()))
-                throw new Exception("Package install failed!");
+                throw new ResolverException("Package install failed!");
 
             string netcoreappDirectory = packageSearchMetadata.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
             string dllDirectory = Path.Combine(_nuGetPackagesRoot, BuildPackageDirectoryPath(packageSearchMetadata.Identity.Id, packageSearchMetadata.Identity.Version.ToFullString()), "lib", netcoreappDirectory);
@@ -93,7 +94,7 @@ namespace DotGet.Core.Resolvers
             DirectoryInfo directoryInfo = new DirectoryInfo(dllDirectory);
             FileInfo assembly = directoryInfo.GetFiles().FirstOrDefault(f => f.Extension == ".dll");
             if (assembly == null)
-                throw new Exception("No assembly found in package!");
+                throw new ResolverException("No assembly found in package!");
 
             return assembly.FullName;
         }
