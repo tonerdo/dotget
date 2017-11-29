@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Linq;
 
 using DotGet.Core.Logging;
+using DotGet.Core.Resolvers;
 
 namespace DotGet.Core.Commands
 {
@@ -16,27 +17,22 @@ namespace DotGet.Core.Commands
             _logger = logger;
         }
 
-        public Dictionary<string, string> GetEtc(string path)
-        {
-            string json = File.ReadAllText(path);
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-        }
-
         public bool Execute()
         {
-            string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
-            globalNugetDirectory = Path.Combine(globalNugetDirectory, ".nuget");
+            string bin = Path.Combine(Globals.GlobalNuGetDirectory, "bin");
+            string[] files = Directory.GetFiles(bin);
 
-            string etcDirectory = Path.Combine(globalNugetDirectory, "etc");
-            _logger.LogInformation(etcDirectory);
-
-            string[] etcFiles = Directory.GetFiles(etcDirectory);
-            foreach (string filePath in etcFiles)
+            if (files.Length == 0)
             {
-                string bin = Path.GetFileNameWithoutExtension(filePath);
-                Dictionary<string, string> etc = GetEtc(filePath);
-                _logger.LogInformation(etc["tool"] + " => " + bin);
+                _logger.LogInformation("No tools installed!");
+                return true;
+            }
+
+            foreach (var file in files)
+            {
+                string command = File.ReadAllLines(file).ToList().Last();
+                Resolver resolver = new ResolverFactory().GetResolver(command);
+                Console.WriteLine(resolver.GetToolName(command) + " => " + Path.GetFileNameWithoutExtension(command));
             }
 
             return true;

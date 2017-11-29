@@ -25,7 +25,8 @@ namespace DotGet.Core.Resolvers
         private string _nuGetPackagesRoot;
         private NuGetLogger _nugetLogger;
 
-        public NuGetPackageResolver(string tool, ResolutionType resolutionType, ILogger logger) : base(tool, resolutionType, logger)
+        public NuGetPackageResolver(string tool, ResolutionType resolutionType, ILogger logger)
+            : base(tool, resolutionType, logger)
         {
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
@@ -46,8 +47,24 @@ namespace DotGet.Core.Resolvers
             options.Add("package", parts[0]);
             if (parts.Length > 1)
                 options.Add("version", parts[1]);
-            
+
             return options;
+        }
+
+        public override bool DidResolve(string command)
+        {
+            string path = GetPathFromCommand(command);
+            return path.Contains(_nuGetPackagesRoot);
+        }
+
+        public override string GetToolName(string command)
+        {
+            string path = GetPathFromCommand(command);
+            path = path.Replace(_nuGetPackagesRoot, string.Empty);
+            path = path.Trim(Path.DirectorySeparatorChar).Trim(Path.AltDirectorySeparatorChar);
+            var characters
+                = path.TakeWhile((c) => c != Path.DirectorySeparatorChar || c != Path.AltDirectorySeparatorChar);
+            return new String(characters.ToArray());
         }
 
         public override string Resolve()
@@ -67,7 +84,7 @@ namespace DotGet.Core.Resolvers
             if (!HasNetCoreAppDependencyGroup(packageSearchMetadata))
                 throw new Exception($"{package} does not support .NETCoreApp framework!");
 
-            if (!InstallNuGetPackage(packageSearchMetadata.Identity.Id, packageSearchMetadata.Identity.Version.ToFullString()))
+            if (!RestoreNuGetPackage(packageSearchMetadata.Identity.Id, packageSearchMetadata.Identity.Version.ToFullString()))
                 throw new Exception("Package install failed!");
 
             string netcoreappDirectory = packageSearchMetadata.DependencySets.Select(d => d.TargetFramework).LastOrDefault(t => t.Framework == ".NETCoreApp").GetShortFolderName();
@@ -81,10 +98,20 @@ namespace DotGet.Core.Resolvers
             return assembly.FullName;
         }
 
+        private string GetPathFromCommand(string command)
+        {
+            string[] parts = command.Split(' ');
+            string path = parts[1];
+            if (parts.Length > 3)
+                path = string.Join(string.Empty, parts.ToList().GetRange(1, parts.Length - 2));
+
+            return path;
+        }
+
         private bool HasNetCoreAppDependencyGroup(IPackageSearchMetadata package)
             => package.DependencySets.Any(d => d.TargetFramework.Framework == ".NETCoreApp");
 
-        private IPackageSearchMetadata GetPackageFromFeed(string packageId, string version = "")
+        private IPackageSearchMetadata GetPackageFromFeed(string packageId, string version)
         {
             PackageMetadataResource packageMetadataResource = _sourceRepository.GetResource<PackageMetadataResource>();
             IEnumerable<IPackageSearchMetadata> searchMetadata = packageMetadataResource
@@ -94,7 +121,7 @@ namespace DotGet.Core.Resolvers
                 ? searchMetadata.LastOrDefault() : searchMetadata.FirstOrDefault(s => s.Identity.Version.ToFullString() == version);
         }
 
-        private bool InstallNuGetPackage(string packageId, string version)
+        private bool RestoreNuGetPackage(string packageId, string version)
         {
             TargetFrameworkInformation tfi = new TargetFrameworkInformation() { FrameworkName = NuGetFramework.ParseFolder("netcoreapp2.0") };
             LibraryDependency dependency = new LibraryDependency

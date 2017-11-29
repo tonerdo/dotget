@@ -21,8 +21,11 @@ namespace DotGet.Core.Resolvers
             this.ResolutionType = resolutionType;
             this.Options = this.BuildOptions();
         }
+
         public abstract bool CanResolve();
         public abstract Options BuildOptions();
+        public abstract bool DidResolve(string command);
+        public abstract string GetToolName(string command);
         public abstract string Resolve();
     }
 }

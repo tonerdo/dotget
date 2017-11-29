@@ -8,6 +8,8 @@ namespace DotGet.Core.Resolvers
     {
         private Resolver[] _resolvers;
 
+        public ResolverFactory() : this(string.Empty, 0, null) { }
+
         public ResolverFactory(string tool, ResolutionType resolutionType, ILogger logger)
         {
             _resolvers = new Resolver[] { new NuGetPackageResolver(tool, resolutionType, logger) };
@@ -16,6 +18,12 @@ namespace DotGet.Core.Resolvers
         public Resolver GetResolver()
         {
             return _resolvers.FirstOrDefault(r => r.CanResolve())
+                ?? throw new Exception("No suitable resolver found");
+        }
+
+        public Resolver GetResolver(string command)
+        {
+            return _resolvers.FirstOrDefault(r => r.DidResolve(command))
                 ?? throw new Exception("No suitable resolver found");
         }
     }
