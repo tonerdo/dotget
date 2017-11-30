@@ -58,7 +58,7 @@ namespace DotGet.Core.Resolvers
             return path.Contains(_nuGetPackagesRoot);
         }
 
-        public override string GetToolName(string command)
+        public override string GetSource(string command)
         {
             string path = GetPathFromCommand(command);
             path = path.Replace(_nuGetPackagesRoot, string.Empty);

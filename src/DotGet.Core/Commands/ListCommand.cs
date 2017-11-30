@@ -31,7 +31,7 @@ namespace DotGet.Core.Commands
             {
                 string command = File.ReadAllLines(file).ToList().Last();
                 Resolver resolver = new ResolverFactory().GetResolver(command);
-                Console.WriteLine(resolver.GetToolName(command) + " => " + Path.GetFileNameWithoutExtension(command));
+                Console.WriteLine(resolver.GetSource(command) + " => " + Path.GetFileNameWithoutExtension(command));
             }
 
             return true;
