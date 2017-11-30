@@ -27,6 +27,9 @@ namespace DotGet.Core.Commands
                 return true;
             }
 
+            Console.WriteLine("Globally installed .NET Core Tools");
+            Console.WriteLine("==================================");
+
             foreach (var file in files)
             {
                 string command = File.ReadAllLines(file).ToList().Last();
