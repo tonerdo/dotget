@@ -63,9 +63,12 @@ namespace DotGet.Core.Resolvers
             string path = GetPathFromCommand(command);
             path = path.Replace(_nuGetPackagesRoot, string.Empty);
             path = path.Trim(Path.DirectorySeparatorChar).Trim(Path.AltDirectorySeparatorChar);
-            var characters
-                = path.TakeWhile((c) => c != Path.DirectorySeparatorChar || c != Path.AltDirectorySeparatorChar);
-            return new String(characters.ToArray());
+
+            if (Path.DirectorySeparatorChar != Path.AltDirectorySeparatorChar)
+                path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+            string[] parts = path.Split(Path.DirectorySeparatorChar);
+            return $"{parts[0]}@{parts[1]}";
         }
 
         public override string Resolve()
