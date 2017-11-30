@@ -26,8 +26,8 @@ namespace DotGet.Core.Resolvers
         private string _nuGetPackagesRoot;
         private NuGetLogger _nugetLogger;
 
-        public NuGetPackageResolver(string tool, ResolutionType resolutionType, ILogger logger)
-            : base(tool, resolutionType, logger)
+        public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger)
+            : base(source, resolutionType, logger)
         {
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
@@ -38,12 +38,12 @@ namespace DotGet.Core.Resolvers
         }
 
         public override bool CanResolve()
-            => !Tool.Contains("/") && !Tool.Contains(@"\") && !Tool.StartsWith(".");
+            => !Source.Contains("/") && !Source.Contains(@"\") && !Source.StartsWith(".");
 
         public override Options BuildOptions()
         {
             Options options = new Options();
-            string[] parts = Tool.Split('@');
+            string[] parts = Source.Split('@');
 
             options.Add("package", parts[0]);
             if (parts.Length > 1)

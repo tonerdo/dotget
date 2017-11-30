@@ -9,12 +9,12 @@ namespace DotGet.Core.Commands
 {
     public class UninstallCommand : ICommand
     {
-        private string _tool;
+        private string _source;
         private ILogger _logger;
 
-        public UninstallCommand(string tool, ILogger logger)
+        public UninstallCommand(string source, ILogger logger)
         {
-            _tool = tool;
+            _source = source;
             _logger = logger;
         }
 
@@ -40,7 +40,7 @@ namespace DotGet.Core.Commands
 
             string etcDirectory = Path.Combine(globalNugetDirectory, "etc");
             string binDirectory = Path.Combine(globalNugetDirectory, "bin");
-            _logger.LogInformation($"Uninstalling {_tool}...");
+            _logger.LogInformation($"Uninstalling {_source}...");
 
             string[] etcFiles = Directory.GetFiles(etcDirectory);
             Dictionary<string, string> etc = null;
@@ -49,7 +49,7 @@ namespace DotGet.Core.Commands
             foreach (string filePath in etcFiles)
             {
                 etc = GetEtc(filePath);
-                if (etc["tool"] == _tool)
+                if (etc["tool"] == _source)
                 {
                     toolEtc = filePath;
                     break;
@@ -58,13 +58,13 @@ namespace DotGet.Core.Commands
 
             if (toolEtc == null)
             {
-                _logger.LogError($"No tool with name: {_tool}, is installed");
+                _logger.LogError($"No tool with name: {_source}, is installed");
                 return false;
             }
 
             File.Delete(toolEtc);
             File.Delete(Path.Combine(binDirectory, GetBinExtension()));
-            _logger.LogSuccess($"{_tool} uninstalled successfully");
+            _logger.LogSuccess($"{_source} uninstalled successfully");
             return true;
         }
     }

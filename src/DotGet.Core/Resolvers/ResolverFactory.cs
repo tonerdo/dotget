@@ -10,9 +10,9 @@ namespace DotGet.Core.Resolvers
 
         public ResolverFactory() : this(string.Empty, 0, null) { }
 
-        public ResolverFactory(string tool, ResolutionType resolutionType, ILogger logger)
+        public ResolverFactory(string source, ResolutionType resolutionType, ILogger logger)
         {
-            _resolvers = new Resolver[] { new NuGetPackageResolver(tool, resolutionType, logger) };
+            _resolvers = new Resolver[] { new NuGetPackageResolver(source, resolutionType, logger) };
         }
 
         public Resolver GetResolver()

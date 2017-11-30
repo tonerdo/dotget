@@ -11,18 +11,18 @@ namespace DotGet.Core.Commands
 {
     public class InstallCommand : ICommand
     {
-        private string _tool;
+        private string _source;
         private ILogger _logger;
 
-        public InstallCommand(string tool, ILogger logger)
+        public InstallCommand(string source, ILogger logger)
         {
-            _tool = tool;
+            _source = source;
             _logger = logger;
         }
 
         public bool Execute()
         {
-            Resolver resolver = new ResolverFactory(_tool, ResolutionType.Install, _logger).GetResolver();
+            Resolver resolver = new ResolverFactory(_source, ResolutionType.Install, _logger).GetResolver();
             string path = string.Empty;
 
             try
@@ -42,7 +42,7 @@ namespace DotGet.Core.Commands
 
             if (File.Exists(filename))
             {
-                _logger.LogError($"{_tool} is already installed. Try updating it instead!");
+                _logger.LogError($"{_source} is already installed. Try updating it instead!");
                 return false;
             }
 

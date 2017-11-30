@@ -12,18 +12,18 @@ namespace DotGet.Core.Commands
 {
     public class UpgradeCommand : ICommand
     {
-        private string _tool;
+        private string _source;
         private ILogger _logger;
 
-        public UpgradeCommand(string tool, ILogger logger)
+        public UpgradeCommand(string source, ILogger logger)
         {
-            _tool = tool;
+            _source = source;
             _logger = logger;
         }
 
         public bool Execute()
         {
-            Resolver resolver = new ResolverFactory(_tool, ResolutionType.Upgrade, _logger).GetResolver();
+            Resolver resolver = new ResolverFactory(_source, ResolutionType.Upgrade, _logger).GetResolver();
             string path = string.Empty;
 
             try
@@ -40,7 +40,7 @@ namespace DotGet.Core.Commands
 
             if (!File.Exists(filename))
             {
-                _logger.LogError($"{_tool} is not installed.");
+                _logger.LogError($"{_source} is not installed.");
                 return false;
             }
 

@@ -6,17 +6,17 @@ namespace DotGet.Core.Resolvers
 {
     internal abstract class Resolver
     {
-        protected string Tool { get; private set; }
+        protected string Source { get; private set; }
         protected Options Options { get; private set; }
         protected ILogger Logger { get; set; }
         protected ResolutionType ResolutionType { get; set; }
 
-        public Resolver(string tool, ResolutionType resolutionType, ILogger logger)
+        public Resolver(string source, ResolutionType resolutionType, ILogger logger)
         {
-            if (tool == null)
-                throw new ArgumentNullException(nameof(tool));
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
 
-            this.Tool = tool;
+            this.Source = source;
             this.Logger = logger;
             this.ResolutionType = resolutionType;
             this.Options = this.BuildOptions();

@@ -29,7 +29,7 @@ namespace DotGet.Cli
                 c.Description = "Installs a .NET Core tool";
                 c.HelpOption("-h|--help");
 
-                CommandArgument toolArg = c.Argument("<TOOL>", "The tool to install. Can be a NuGet package");
+                CommandArgument toolArg = c.Argument("<SOURCE>", "The tool to install. Can be a NuGet package");
 
                 c.OnExecute(() =>
                 {
