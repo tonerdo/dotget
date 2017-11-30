@@ -25,6 +25,7 @@ namespace DotGet.Core.Resolvers
         private SourceRepository _sourceRepository;
         private string _nuGetPackagesRoot;
         private NuGetLogger _nugetLogger;
+        private static readonly string _nuGetFeed = "https://api.nuget.org/v3/index.json";
 
         public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger)
             : base(source, resolutionType, logger)
@@ -32,7 +33,7 @@ namespace DotGet.Core.Resolvers
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
 
-            _sourceRepository = new SourceRepository(new PackageSource(Globals.NuGetFeed), providers);
+            _sourceRepository = new SourceRepository(new PackageSource(_nuGetFeed), providers);
             _nuGetPackagesRoot = Path.Combine(Globals.GlobalNuGetDirectory, "packages");
             _nugetLogger = new NuGetLogger(Logger);
         }

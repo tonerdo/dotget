@@ -10,10 +10,8 @@ namespace DotGet.Core
 
         public static readonly string GlobalNuGetDirectory
             = Path.Combine(Environment.GetEnvironmentVariable(IsWindows ? "USERPROFILE" : "HOME"), ".nuget");
-        
+
         public static readonly string GlobalBinDirectory
             = Path.Combine(GlobalNuGetDirectory, "bin");
-
-        public static readonly string NuGetFeed = "https://api.nuget.org/v3/index.json";
     }
 }
