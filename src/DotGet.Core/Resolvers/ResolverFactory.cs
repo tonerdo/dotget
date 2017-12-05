@@ -8,7 +8,7 @@ namespace DotGet.Core.Resolvers
     {
         private Resolver[] _resolvers;
 
-        public ResolverFactory() : this(string.Empty, 0, null) { }
+        public ResolverFactory() : this(string.Empty, ResolutionType.None, null) { }
 
         public ResolverFactory(string source, ResolutionType resolutionType, ILogger logger)
         {
