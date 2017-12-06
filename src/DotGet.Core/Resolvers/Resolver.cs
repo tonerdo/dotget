@@ -24,8 +24,9 @@ namespace DotGet.Core.Resolvers
 
         public abstract bool CanResolve();
         public abstract Options BuildOptions();
-        public abstract bool DidResolve(string command);
-        public abstract string GetSource(string command);
+        public abstract bool DidResolve(string path);
+        public abstract string GetSource(string path);
+        public abstract string GetFullSource(string path);
         public abstract string Resolve();
     }
 }

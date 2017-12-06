@@ -53,22 +53,17 @@ namespace DotGet.Core.Resolvers
             return options;
         }
 
-        public override bool DidResolve(string command)
+        public override bool DidResolve(string path) => path.Contains(_nuGetPackagesRoot);
+
+        public override string GetSource(string path)
         {
-            string path = GetPathFromCommand(command);
-            return path.Contains(_nuGetPackagesRoot);
+            string[] parts = SplitPath(path);
+            return $"{parts[0]}";
         }
 
-        public override string GetSource(string command)
+        public override string GetFullSource(string path)
         {
-            string path = GetPathFromCommand(command);
-            path = path.Replace(_nuGetPackagesRoot, string.Empty);
-            path = path.Trim(Path.DirectorySeparatorChar).Trim(Path.AltDirectorySeparatorChar);
-
-            if (Path.DirectorySeparatorChar != Path.AltDirectorySeparatorChar)
-                path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
-            string[] parts = path.Split(Path.DirectorySeparatorChar);
+            string[] parts = SplitPath(path);
             return $"{parts[0]}@{parts[1]}";
         }
 
@@ -103,14 +98,11 @@ namespace DotGet.Core.Resolvers
             return assembly.FullName;
         }
 
-        private string GetPathFromCommand(string command)
+        private string[] SplitPath(string path)
         {
-            string[] parts = command.Split(' ');
-            string path = parts[1];
-            if (parts.Length > 3)
-                path = string.Join(string.Empty, parts.ToList().GetRange(1, parts.Length - 2));
-
-            return path;
+            path = path.Replace(_nuGetPackagesRoot, string.Empty);
+            path = path.Trim(Path.DirectorySeparatorChar);
+            return path.Split(Path.DirectorySeparatorChar);
         }
 
         private bool HasNetCoreAppDependencyGroup(IPackageSearchMetadata package)

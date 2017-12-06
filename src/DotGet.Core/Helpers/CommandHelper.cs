@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 
 namespace DotGet.Core.Helpers
 {
@@ -16,6 +17,19 @@ namespace DotGet.Core.Helpers
         {
             string filename = Path.GetFileNameWithoutExtension(path);
             return Globals.IsWindows ? filename + ".cmd" : filename;
+        }
+
+        public static string GetPathFromCommand(string command)
+        {
+            string[] parts = command.Split(' ');
+            string path = parts[1];
+            if (parts.Length > 3)
+                path = string.Join(string.Empty, parts.ToList().GetRange(1, parts.Length - 2));
+
+            if (Path.DirectorySeparatorChar != Path.AltDirectorySeparatorChar)
+                path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+            return path;
         }
     }
 }
