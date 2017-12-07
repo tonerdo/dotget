@@ -19,6 +19,9 @@ namespace DotGet.Core.Helpers
             return Globals.IsWindows ? filename + ".cmd" : filename;
         }
 
+        public static string GetCommandFromFile(string file)
+            => File.ReadAllLines(file).ToList().Last();
+
         public static string GetPathFromCommand(string command)
         {
             string[] parts = command.Split(' ');

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
@@ -33,7 +32,7 @@ namespace DotGet.Core.Commands
 
             foreach (var file in files)
             {
-                string command = File.ReadAllLines(file).ToList().Last();
+                string command = CommandHelper.GetCommandFromFile(file);
                 string path = CommandHelper.GetPathFromCommand(command);
                 Resolver resolver = ResolverFactory.GetResolverForPath(path);
                 Console.WriteLine(resolver.GetFullSource(path) + " => " + Path.GetFileNameWithoutExtension(command));

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 using DotGet.Core.Helpers;
@@ -26,7 +25,7 @@ namespace DotGet.Core.Commands
             string[] files = Directory.GetFiles(Globals.GlobalBinDirectory);
             foreach (var file in files)
             {
-                string command = File.ReadAllLines(file).ToList().Last();
+                string command = CommandHelper.GetCommandFromFile(file);
                 string path = CommandHelper.GetPathFromCommand(command);
                 Resolver resolver = ResolverFactory.GetResolverForPath(path);
 
