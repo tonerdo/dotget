@@ -10,12 +10,12 @@ using DotGet.Core.Resolvers;
 
 namespace DotGet.Core.Commands
 {
-    public class UpgradeCommand : ICommand
+    public class UpdateCommand : ICommand
     {
         private string _source;
         private ILogger _logger;
 
-        public UpgradeCommand(string source, ILogger logger)
+        public UpdateCommand(string source, ILogger logger)
         {
             _source = source;
             _logger = logger;
@@ -28,7 +28,7 @@ namespace DotGet.Core.Commands
 
             try
             {
-                path = resolver.Resolve(_source, ResolutionType.Upgrade, _logger);
+                path = resolver.Resolve(_source, ResolutionType.Update, _logger);
             }
             catch (ResolverException ex)
             {

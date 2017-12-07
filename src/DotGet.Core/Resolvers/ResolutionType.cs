@@ -5,6 +5,6 @@ namespace DotGet.Core.Resolvers
     internal enum ResolutionType
     {
         Install,
-        Upgrade
+        Update
     }
 }
