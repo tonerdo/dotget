@@ -87,6 +87,21 @@ namespace DotGet.Core.Resolvers
             return assembly.FullName;
         }
 
+        public override bool Remove(string source, ILogger logger)
+        {
+            var options = BuildOptions(source);
+            try
+            {
+                string directory = Path.Combine(_nuGetPackagesRoot, options["package"], options["version"]);
+                Directory.Delete(directory, true);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private string[] SplitPath(string path)
         {
             path = path.Replace(_nuGetPackagesRoot, string.Empty);

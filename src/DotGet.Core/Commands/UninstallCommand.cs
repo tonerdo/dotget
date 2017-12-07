@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
+using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
+using DotGet.Core.Resolvers;
 
 namespace DotGet.Core.Commands
 {
@@ -18,54 +21,27 @@ namespace DotGet.Core.Commands
             _logger = logger;
         }
 
-        public Dictionary<string, string> GetEtc(string path)
-        {
-            string json = File.ReadAllText(path);
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-        }
-
-        private string GetBinExtension()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return ".cmd";
-
-            return string.Empty;
-        }
-
         public bool Execute()
         {
-            string globalNugetDirectory = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                ? Environment.GetEnvironmentVariable("USERPROFILE") : Environment.GetEnvironmentVariable("HOME");
-            globalNugetDirectory = Path.Combine(globalNugetDirectory, ".nuget");
-
-            string etcDirectory = Path.Combine(globalNugetDirectory, "etc");
-            string binDirectory = Path.Combine(globalNugetDirectory, "bin");
-            _logger.LogInformation($"Uninstalling {_source}...");
-
-            string[] etcFiles = Directory.GetFiles(etcDirectory);
-            Dictionary<string, string> etc = null;
-            string toolEtc = null;
-
-            foreach (string filePath in etcFiles)
+            string[] files = Directory.GetFiles(Globals.GlobalBinDirectory);
+            foreach (var file in files)
             {
-                etc = GetEtc(filePath);
-                if (etc["tool"] == _source)
+                string command = File.ReadAllLines(file).ToList().Last();
+                string path = CommandHelper.GetPathFromCommand(command);
+                Resolver resolver = ResolverFactory.GetResolverForPath(path);
+
+                if (resolver.GetSource(path) == _source
+                    || resolver.GetFullSource(path) == _source)
                 {
-                    toolEtc = filePath;
-                    break;
+                    if (resolver.Remove(resolver.GetFullSource(path), _logger))
+                    {
+                        File.Delete(file);
+                        return true;
+                    }
                 }
             }
 
-            if (toolEtc == null)
-            {
-                _logger.LogError($"No tool with name: {_source}, is installed");
-                return false;
-            }
-
-            File.Delete(toolEtc);
-            File.Delete(Path.Combine(binDirectory, GetBinExtension()));
-            _logger.LogSuccess($"{_source} uninstalled successfully");
-            return true;
+            return false;
         }
     }
 }

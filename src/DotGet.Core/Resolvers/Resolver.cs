@@ -11,5 +11,6 @@ namespace DotGet.Core.Resolvers
         public abstract string GetSource(string path);
         public abstract string GetFullSource(string path);
         public abstract string Resolve(string source, ResolutionType resolutionType, ILogger logger);
+        public abstract bool Remove(string source, ILogger logger);
     }
 }
