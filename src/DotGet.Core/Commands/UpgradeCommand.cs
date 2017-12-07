@@ -23,12 +23,12 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            Resolver resolver = new ResolverFactory(_source, ResolutionType.Upgrade, _logger).GetResolver();
+            Resolver resolver = ResolverFactory.GetResolverForSource(_source);
             string path = string.Empty;
 
             try
             {
-                path = resolver.Resolve();
+                path = resolver.Resolve(_source, ResolutionType.Upgrade, _logger);
             }
             catch (ResolverException ex)
             {

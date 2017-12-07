@@ -27,31 +27,17 @@ namespace DotGet.Core.Resolvers
         private NuGetLogger _nugetLogger;
         private static readonly string _nuGetFeed = "https://api.nuget.org/v3/index.json";
 
-        public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger)
-            : base(source, resolutionType, logger)
+        public NuGetPackageResolver()
         {
             List<Lazy<INuGetResourceProvider>> providers = new List<Lazy<INuGetResourceProvider>>();
             providers.AddRange(Repository.Provider.GetCoreV3());
 
             _sourceRepository = new SourceRepository(new PackageSource(_nuGetFeed), providers);
             _nuGetPackagesRoot = Path.Combine(Globals.GlobalNuGetDirectory, "packages");
-            _nugetLogger = new NuGetLogger(Logger);
         }
 
-        public override bool CanResolve()
-            => !Source.Contains("/") && !Source.Contains(@"\") && !Source.StartsWith(".");
-
-        public override Options BuildOptions()
-        {
-            Options options = new Options();
-            string[] parts = Source.Split('@');
-
-            options.Add("package", parts[0]);
-            if (parts.Length > 1)
-                options.Add("version", parts[1]);
-
-            return options;
-        }
+        public override bool CanResolve(string source)
+            => !source.Contains("/") && !source.Contains(@"\") && !source.StartsWith(".");
 
         public override bool DidResolve(string path) => path.Contains(_nuGetPackagesRoot);
 
@@ -67,11 +53,14 @@ namespace DotGet.Core.Resolvers
             return $"{parts[0]}@{parts[1]}";
         }
 
-        public override string Resolve()
+        public override string Resolve(string source, ResolutionType resolutionType, ILogger logger)
         {
-            bool hasVersion = Options.TryGetValue("version", out string version);
-            string package = Options["package"];
-            IPackageSearchMetadata packageSearchMetadata = GetPackageFromFeed(package, hasVersion && ResolutionType == ResolutionType.Install ? version : "");
+            _nugetLogger = new NuGetLogger(logger);
+            var options = BuildOptions(source);
+            bool hasVersion = options.TryGetValue("version", out string version);
+            string package = options["package"];
+
+            IPackageSearchMetadata packageSearchMetadata = GetPackageFromFeed(package, hasVersion && resolutionType == ResolutionType.Install ? version : "");
             if (packageSearchMetadata == null)
             {
                 string error = $"Could not find package {package}";
@@ -103,6 +92,18 @@ namespace DotGet.Core.Resolvers
             path = path.Replace(_nuGetPackagesRoot, string.Empty);
             path = path.Trim(Path.DirectorySeparatorChar);
             return path.Split(Path.DirectorySeparatorChar);
+        }
+
+        public Options BuildOptions(string source)
+        {
+            Options options = new Options();
+            string[] parts = source.Split('@');
+
+            options.Add("package", parts[0]);
+            if (parts.Length > 1)
+                options.Add("version", parts[1]);
+
+            return options;
         }
 
         private bool HasNetCoreAppDependencyGroup(IPackageSearchMetadata package)

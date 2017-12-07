@@ -4,26 +4,24 @@ using DotGet.Core.Logging;
 
 namespace DotGet.Core.Resolvers
 {
-    internal class ResolverFactory
+    internal static class ResolverFactory
     {
-        private Resolver[] _resolvers;
+        private static Resolver[] _resolvers;
 
-        public ResolverFactory() : this(string.Empty, ResolutionType.None, null) { }
-
-        public ResolverFactory(string source, ResolutionType resolutionType, ILogger logger)
+        static ResolverFactory()
         {
-            _resolvers = new Resolver[] { new NuGetPackageResolver(source, resolutionType, logger) };
+            _resolvers = new Resolver[] { new NuGetPackageResolver() };
         }
 
-        public Resolver GetResolver()
+        public static Resolver GetResolverForSource(string source)
         {
-            return _resolvers.FirstOrDefault(r => r.CanResolve())
+            return _resolvers.FirstOrDefault(r => r.CanResolve(source))
                 ?? throw new Exception("No suitable resolver found");
         }
 
-        public Resolver GetResolver(string command)
+        public static Resolver GetResolverForPath(string path)
         {
-            return _resolvers.FirstOrDefault(r => r.DidResolve(command))
+            return _resolvers.FirstOrDefault(r => r.DidResolve(path))
                 ?? throw new Exception("No suitable resolver found");
         }
     }
