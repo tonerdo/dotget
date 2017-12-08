@@ -23,7 +23,7 @@ namespace DotGet.Core.Commands
 
             if (files.Length == 0)
             {
-                _logger.LogInformation("No .NET Core tools installed!");
+                _logger.LogInformation("No .NET Core tool installed!");
                 return true;
             }
 
