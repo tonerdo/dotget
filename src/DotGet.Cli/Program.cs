@@ -86,18 +86,18 @@ namespace DotGet.Cli
                 c.Description = "Uninstalls a .NET Core tool";
                 c.HelpOption("-h|--help");
 
-                CommandArgument toolArg = c.Argument("<SOURCE>", "The tool to uninstall.");
+                CommandArgument source = c.Argument("<SOURCE>", "The tool to uninstall.");
 
                 c.OnExecute(() =>
                 {
-                    if (string.IsNullOrWhiteSpace(toolArg.Value))
+                    if (string.IsNullOrWhiteSpace(source.Value))
                     {
                         logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    UninstallCommand uninstallCommand = new UninstallCommand(toolArg.Value, logger);
+                    UninstallCommand uninstallCommand = new UninstallCommand(source.Value, logger);
                     uninstallCommand.Execute();
                     return 0;
                 });
