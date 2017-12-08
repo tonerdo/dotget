@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ConsoleTables;
 using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
@@ -27,16 +28,22 @@ namespace DotGet.Core.Commands
                 return true;
             }
 
-            Console.WriteLine("Globally installed .NET Core Tools");
-            Console.WriteLine("==================================");
+            ConsoleTable consoleTable = new ConsoleTable("Name", "Full Name", "Command");
 
             foreach (var file in files)
             {
                 string command = CommandHelper.GetCommandFromFile(file);
                 string path = CommandHelper.GetPathFromCommand(command);
                 Resolver resolver = ResolverFactory.GetResolverForPath(path);
-                Console.WriteLine(resolver.GetFullSource(path) + " => " + Path.GetFileNameWithoutExtension(command));
+                consoleTable.AddRow(
+                    resolver.GetSource(path),
+                    resolver.GetFullSource(path),
+                    Path.GetFileNameWithoutExtension(command)
+                );
             }
+
+            _logger.LogInformation($"{files.Length} tool(s) installed");
+            consoleTable.Write(Format.Alternative);
 
             return true;
         }
