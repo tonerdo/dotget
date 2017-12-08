@@ -4,6 +4,5 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.Commands" Version="4.4.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
   </ItemGroup>
 </Project>
