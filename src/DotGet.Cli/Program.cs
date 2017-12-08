@@ -29,18 +29,18 @@ namespace DotGet.Cli
                 c.Description = "Installs a .NET Core tool";
                 c.HelpOption("-h|--help");
 
-                CommandArgument toolArg = c.Argument("<SOURCE>", "The tool to install. Can be a NuGet package");
+                CommandArgument source = c.Argument("<SOURCE>", "The tool to install. Can be a NuGet package");
 
                 c.OnExecute(() =>
                 {
-                    if (string.IsNullOrWhiteSpace(toolArg.Value))
+                    if (string.IsNullOrWhiteSpace(source.Value))
                     {
-                        logger.LogError("<TOOL> argument is required. Use -h|--help to see help");
+                        logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    InstallCommand installCommand = new InstallCommand(toolArg.Value, logger);
+                    InstallCommand installCommand = new InstallCommand(source.Value, logger);
                     installCommand.Execute();
                     return 0;
                 });
@@ -51,18 +51,18 @@ namespace DotGet.Cli
                 c.Description = "Updates a .NET Core tool";
                 c.HelpOption("-h|--help");
 
-                CommandArgument toolArg = c.Argument("<TOOL>", "The tool to update.");
+                CommandArgument source = c.Argument("<SOURCE>", "The tool to update.");
 
                 c.OnExecute(() =>
                 {
-                    if (string.IsNullOrWhiteSpace(toolArg.Value))
+                    if (string.IsNullOrWhiteSpace(source.Value))
                     {
-                        logger.LogError("<TOOL> argument is required. Use -h|--help to see help");
+                        logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    UpdateCommand updateCommand = new UpdateCommand(toolArg.Value, logger);
+                    UpdateCommand updateCommand = new UpdateCommand(source.Value, logger);
                     updateCommand.Execute();
                     return 0;
                 });
@@ -86,13 +86,13 @@ namespace DotGet.Cli
                 c.Description = "Uninstalls a .NET Core tool";
                 c.HelpOption("-h|--help");
 
-                CommandArgument toolArg = c.Argument("<TOOL>", "The tool to uninstall.");
+                CommandArgument toolArg = c.Argument("<SOURCE>", "The tool to uninstall.");
 
                 c.OnExecute(() =>
                 {
                     if (string.IsNullOrWhiteSpace(toolArg.Value))
                     {
-                        logger.LogError("<TOOL> argument is required. Use -h|--help to see help");
+                        logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
 
