@@ -47,7 +47,9 @@ namespace DotGet.Core.Commands
             }
 
             File.WriteAllText(filename, CommandHelper.BuildBinContents(path));
-            // TODO: make unix bin file executable
+            if (!Globals.IsWindows)
+                return CommandHelper.MakeUnixExecutable(filename);
+
             return true;
         }
     }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -33,6 +34,18 @@ namespace DotGet.Core.Helpers
                 path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
             return path;
+        }
+
+        public static bool MakeUnixExecutable(string filename)
+        {
+            Process process = new Process();
+            process.StartInfo.FileName = "chmod";
+            process.StartInfo.Arguments = $"+x {filename}";
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.Start();
+            process.WaitForExit();
+            return process.ExitCode == 0;
         }
     }
 }
