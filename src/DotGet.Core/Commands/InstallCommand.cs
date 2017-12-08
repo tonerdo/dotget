@@ -22,6 +22,12 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
+            if (CommandHelper.IsInstalled(_source))
+            {
+                _logger.LogError($"{_source} is already installed. Try updating it instead!");
+                return false;
+            }
+
             Resolver resolver = ResolverFactory.GetResolverForSource(_source);
             string path = string.Empty;
 
@@ -39,13 +45,6 @@ namespace DotGet.Core.Commands
                 Directory.CreateDirectory(Globals.GlobalBinDirectory);
 
             string filename = Path.Combine(Globals.GlobalBinDirectory, CommandHelper.BuildBinFilename(path));
-
-            if (File.Exists(filename))
-            {
-                _logger.LogError($"{_source} is already installed. Try updating it instead!");
-                return false;
-            }
-
             File.WriteAllText(filename, CommandHelper.BuildBinContents(path));
             if (!Globals.IsWindows)
                 return CommandHelper.MakeUnixExecutable(filename);

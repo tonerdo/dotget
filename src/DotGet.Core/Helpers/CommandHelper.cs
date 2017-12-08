@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
+using DotGet.Core.Resolvers;
+
 namespace DotGet.Core.Helpers
 {
     internal static class CommandHelper
@@ -46,6 +48,22 @@ namespace DotGet.Core.Helpers
             process.Start();
             process.WaitForExit();
             return process.ExitCode == 0;
+        }
+
+        public static bool IsInstalled(string source)
+        {
+            string[] files = Directory.GetFiles(Globals.GlobalBinDirectory);
+            foreach (var file in files)
+            {
+                string command = CommandHelper.GetCommandFromFile(file);
+                string path = CommandHelper.GetPathFromCommand(command);
+                Resolver resolver = ResolverFactory.GetResolverForPath(path);
+                if (resolver.GetSource(path) == source
+                    || resolver.GetFullSource(path) == source)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

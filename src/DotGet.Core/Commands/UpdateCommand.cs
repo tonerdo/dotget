@@ -23,6 +23,12 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
+            if (!CommandHelper.IsInstalled(_source))
+            {
+                _logger.LogError($"{_source} is not already installed.");
+                return false;
+            }
+
             Resolver resolver = ResolverFactory.GetResolverForSource(_source);
             string path = string.Empty;
 
@@ -37,13 +43,6 @@ namespace DotGet.Core.Commands
             }
 
             string filename = Path.Combine(Globals.GlobalBinDirectory, CommandHelper.BuildBinFilename(path));
-
-            if (!File.Exists(filename))
-            {
-                _logger.LogError($"{_source} is not installed.");
-                return false;
-            }
-
             File.WriteAllText(filename, CommandHelper.BuildBinContents(path));
             return true;
         }
