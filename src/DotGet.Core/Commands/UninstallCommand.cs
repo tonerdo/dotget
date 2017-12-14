@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using DotGet.Core.Exceptions;
 using DotGet.Core.Helpers;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
@@ -32,11 +33,26 @@ namespace DotGet.Core.Commands
                 if (resolver.GetSource(path) == _source
                     || resolver.GetFullSource(path) == _source)
                 {
-                    if (resolver.Remove(resolver.GetFullSource(path), _logger))
+                    try
                     {
-                        File.Delete(file);
-                        return true;
+                        if (resolver.Remove(resolver.GetFullSource(path), _logger))
+                        {
+                            File.Delete(file);
+                            return true;
+                        }
                     }
+                    catch (ResolverException ex)
+                    {
+                        _logger.LogError(ex.Message);
+                        return false;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogVerbose(ex.Message);
+                        _logger.LogVerbose(ex.StackTrace);
+                        return false;
+                    }
+
                 }
             }
 

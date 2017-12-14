@@ -41,6 +41,12 @@ namespace DotGet.Core.Commands
                 _logger.LogError(ex.Message);
                 return false;
             }
+            catch (Exception ex)
+            {
+                _logger.LogVerbose(ex.Message);
+                _logger.LogVerbose(ex.StackTrace);
+                return false;
+            }
 
             string filename = Path.Combine(Globals.GlobalBinDirectory, CommandHelper.BuildBinFilename(path));
             File.WriteAllText(filename, CommandHelper.BuildBinContents(path));

@@ -40,6 +40,12 @@ namespace DotGet.Core.Commands
                 _logger.LogError(ex.Message);
                 return false;
             }
+            catch (Exception ex)
+            {
+                _logger.LogVerbose(ex.Message);
+                _logger.LogVerbose(ex.StackTrace);
+                return false;
+            }
 
             if (!Directory.Exists(Globals.GlobalBinDirectory))
                 Directory.CreateDirectory(Globals.GlobalBinDirectory);
