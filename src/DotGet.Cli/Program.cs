@@ -40,8 +40,16 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
+                    logger.LogInformation($"Installing {source.Value}");
+
                     InstallCommand installCommand = new InstallCommand(source.Value, logger);
-                    installCommand.Execute();
+                    if (!installCommand.Execute())
+                    {
+                        logger.LogError($"{source.Value} was not installed!");
+                        return 1;
+                    }
+
+                    logger.LogSuccess($"{source.Value} was installed successfully!");
                     return 0;
                 });
             });
