@@ -47,9 +47,6 @@ namespace DotGet.Core.Commands
                 return false;
             }
 
-            if (!Directory.Exists(Globals.GlobalBinDirectory))
-                Directory.CreateDirectory(Globals.GlobalBinDirectory);
-
             string filename = Path.Combine(Globals.GlobalBinDirectory, CommandHelper.BuildBinFilename(path));
             File.WriteAllText(filename, CommandHelper.BuildBinContents(path));
             if (!Globals.IsWindows)
