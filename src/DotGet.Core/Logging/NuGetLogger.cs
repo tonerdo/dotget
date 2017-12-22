@@ -12,11 +12,11 @@ namespace DotGet.Core.Logging
             _logger = logger;
         }
 
-        public void Log(LogLevel level, string data) => _logger.LogVerbose(data);
+        public void Log(NuGet.Common.LogLevel level, string data) => _logger.LogVerbose(data);
 
         public void Log(ILogMessage message) => Log(message.Level, message.Message);
 
-        public Task LogAsync(LogLevel level, string data)
+        public Task LogAsync(NuGet.Common.LogLevel level, string data)
             => Task.Run(() => { _logger.LogVerbose(data); });
 
         public Task LogAsync(ILogMessage message) => LogAsync(message.Level, message.Message);

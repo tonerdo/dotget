@@ -1,9 +1,9 @@
 using System;
 
-namespace DotGet.Cli.Logging
+namespace DotGet.Core.Logging
 {
     [Flags]
-    enum LogLevel
+    public enum LogLevel
     {
         Error = 1,
         Info = 2,
