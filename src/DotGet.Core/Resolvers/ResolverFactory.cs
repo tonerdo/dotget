@@ -15,14 +15,12 @@ namespace DotGet.Core.Resolvers
 
         public static Resolver GetResolverForSource(string source)
         {
-            return _resolvers.FirstOrDefault(r => r.CanResolve(source))
-                ?? throw new Exception("No suitable resolver found");
+            return _resolvers.FirstOrDefault(r => r.CanResolve(source));
         }
 
         public static Resolver GetResolverForPath(string path)
         {
-            return _resolvers.FirstOrDefault(r => r.DidResolve(path))
-                ?? throw new Exception("No suitable resolver found");
+            return _resolvers.FirstOrDefault(r => r.DidResolve(path));
         }
     }
 }
