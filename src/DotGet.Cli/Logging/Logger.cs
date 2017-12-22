@@ -5,13 +5,13 @@ namespace DotGet.Cli.Logging
 {
     class Logger : ILogger
     {
-        public LogLevel Level { get; set; }
+        public LogLevel Level { get; set; } = LogLevel.Error | LogLevel.Info | LogLevel.Success | LogLevel.Warning;
 
         public void LogError(string data)
         {
             if (Level.HasFlag(LogLevel.Error))
             {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(data);
                 Console.ResetColor();
             }
@@ -23,11 +23,23 @@ namespace DotGet.Cli.Logging
                 Console.WriteLine(data);
         }
 
+        public void LogProgress(string data)
+        {
+            if (Level.HasFlag(LogLevel.Info))
+                Console.Write($"{data}... ");
+        }
+
+        public void LogResult(string data)
+        {
+            if (Level.HasFlag(LogLevel.Info))
+                Console.WriteLine($"{data}.");
+        }
+
         public void LogSuccess(string data)
         {
             if (Level.HasFlag(LogLevel.Success))
             {
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(data);
                 Console.ResetColor();
             }
@@ -43,10 +55,12 @@ namespace DotGet.Cli.Logging
         {
             if (Level.HasFlag(LogLevel.Warning))
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine(data);
                 Console.ResetColor();
             }
         }
+
+        public void AllowVerbose() => Level = Level | LogLevel.Verbose;
     }
 }

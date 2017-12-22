@@ -8,7 +8,7 @@ namespace DotGet.Cli
     {
         static int Main(string[] args)
         {
-            Logger logger = new Logger() { Level = LogLevel.Error | LogLevel.Info | LogLevel.Success | LogLevel.Warning };
+            Logger logger = new Logger();
             var app = new CommandLineApplication();
             app.Name = "dotget";
             app.FullName = ".NET Core Tools Global Installer";
@@ -118,7 +118,7 @@ namespace DotGet.Cli
         static void UpdateLoggerIfVerbose(CommandOption verboseOption, Logger logger)
         {
             if (verboseOption.HasValue())
-                logger.Level = logger.Level | LogLevel.Verbose;
+                logger.AllowVerbose();
         }
     }
 }
