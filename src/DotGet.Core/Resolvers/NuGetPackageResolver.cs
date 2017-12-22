@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 using DotGet.Core.Configuration;
 using DotGet.Core.Exceptions;
@@ -173,5 +174,38 @@ namespace DotGet.Core.Resolvers
         }
 
         private string BuildPackageDirectoryPath(string packageId, string version) => Path.Combine(packageId.ToLower(), version);
+    }
+
+    internal class NuGetLogger : NuGet.Common.ILogger
+    {
+        private ILogger _logger;
+
+        public NuGetLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        public void Log(NuGet.Common.LogLevel level, string data) => _logger.LogVerbose(data);
+
+        public void Log(NuGet.Common.ILogMessage message) => Log(message.Level, message.Message);
+
+        public Task LogAsync(NuGet.Common.LogLevel level, string data)
+            => Task.Run(() => { _logger.LogVerbose(data); });
+
+        public Task LogAsync(NuGet.Common.ILogMessage message) => LogAsync(message.Level, message.Message);
+
+        public void LogDebug(string data) => _logger.LogVerbose(data);
+
+        public void LogError(string data) => _logger.LogVerbose(data);
+
+        public void LogInformation(string data) => _logger.LogVerbose(data);
+
+        public void LogInformationSummary(string data) => _logger.LogVerbose(data);
+
+        public void LogMinimal(string data) => _logger.LogVerbose(data);
+
+        public void LogVerbose(string data) => _logger.LogVerbose(data);
+
+        public void LogWarning(string data) => _logger.LogVerbose(data);
     }
 }
