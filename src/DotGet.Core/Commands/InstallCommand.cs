@@ -22,10 +22,11 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            _logger.LogProgress($"Checking if {_source} is already installed");
+            _logger.LogProgress($"Checking if {_source} is not already installed");
             if (CommandHelper.IsInstalled(_source))
             {
                 _logger.LogResult("fail");
+                _logger.LogWarning($"{_source} is already installed");
                 return false;
             }
 
