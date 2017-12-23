@@ -70,8 +70,16 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
+                    logger.LogInformation($"Updating {source.Value}");
+
                     UpdateCommand updateCommand = new UpdateCommand(source.Value, logger);
-                    updateCommand.Execute();
+                    if (!updateCommand.Execute())
+                    {
+                        logger.LogError($"{source.Value} was not updated!");
+                        return 1;
+                    }
+
+                    logger.LogSuccess($"{source.Value} was updated successfully!");
                     return 0;
                 });
             });
