@@ -23,6 +23,15 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
+            _logger.LogProgress($"Checking if {_source} is already installed");
+            if (!CommandHelper.IsInstalled(_source))
+            {
+                _logger.LogResult("fail");
+                return false;
+            }
+
+            _logger.LogResult("ok");
+
             string[] files = Directory.GetFiles(Globals.GlobalBinDirectory);
             foreach (var file in files)
             {
@@ -35,21 +44,30 @@ namespace DotGet.Core.Commands
                 {
                     try
                     {
+                        _logger.LogProgress($"Removing {_source}");
                         if (resolver.Remove(resolver.GetFullSource(path), _logger))
                         {
+                            _logger.LogResult("done");
+                            _logger.LogProgress($"Deleting executable for {_source}");
                             File.Delete(file);
                             return true;
+                        }
+                        else
+                        {
+                            _logger.LogResult("fail");
+                            return false;
                         }
                     }
                     catch (ResolverException ex)
                     {
+                        _logger.LogResult("fail");
                         _logger.LogError(ex.Message);
                         return false;
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogVerbose(ex.Message);
-                        _logger.LogVerbose(ex.StackTrace);
+                        _logger.LogResult("fail");
+                        _logger.LogVerbose(ex.ToString());
                         return false;
                     }
 

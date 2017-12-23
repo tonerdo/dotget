@@ -84,7 +84,7 @@ namespace DotGet.Cli
                 });
             });
 
-            app.Command("list", c => 
+            app.Command("list", c =>
             {
                 c.Description = "Lists all installed .NET Core tools";
                 c.HelpOption("-h|--help");
@@ -113,8 +113,16 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
+                    logger.LogInformation($"Uninstalling {source.Value}");
+
                     UninstallCommand uninstallCommand = new UninstallCommand(source.Value, logger);
-                    uninstallCommand.Execute();
+                    if (!uninstallCommand.Execute())
+                    {
+                        logger.LogError($"{source.Value} failed to uninstall!");
+                        return 1;
+                    }
+
+                    logger.LogSuccess($"{source.Value} was uinstalled!");
                     return 0;
                 });
             });
