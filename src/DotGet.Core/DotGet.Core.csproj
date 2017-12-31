@@ -4,6 +4,5 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ConsoleTables" Version="2.1.0" />
-    <PackageReference Include="NuGet.Commands" Version="4.4.0" />
   </ItemGroup>
 </Project>
