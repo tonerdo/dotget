@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using DotGet.Core.Exceptions;
+using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
@@ -21,6 +21,21 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
+            ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Install, _logger);
+            Resolver resolver = resolverFactory.GetResolver();
+            if (resolver == null)
+                throw new Exception("No resolver found");
+
+            if (resolver.CheckInstalled())
+                throw new Exception("Source already installed. Try updating!");
+
+            if (!resolver.Resolve())
+                throw new Exception("Failed to resolve source");
+
+            SourceInfo sourceInfo = resolver.GetSourceInfo();
+            // TODO: Write {sourceInfo} to {sourceInfo.Name}.info.json
+            // in {sourceInfo.Directory} folder
+
             return true;
         }
     }
