@@ -6,6 +6,8 @@ using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
+using Newtonsoft.Json;
+
 namespace DotGet.Core.Commands
 {
     public class InstallCommand : ICommand
@@ -33,8 +35,11 @@ namespace DotGet.Core.Commands
                 throw new Exception("Failed to resolve source");
 
             SourceInfo sourceInfo = resolver.GetSourceInfo();
-            // TODO: Write {sourceInfo} to {sourceInfo.Name}.info.json
-            // in {sourceInfo.Directory} folder
+            File.WriteAllText
+            (
+                Path.Combine(SpecialFolders.Lib, sourceInfo.Directory, $"{sourceInfo.Name}.info.json"),
+                JsonConvert.SerializeObject(sourceInfo, Formatting.Indented)
+            );
 
             return true;
         }
