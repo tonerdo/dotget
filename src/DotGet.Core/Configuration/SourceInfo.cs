@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace DotGet.Core.Configuration
 {
     internal class SourceInfo
@@ -5,6 +7,6 @@ namespace DotGet.Core.Configuration
         public string Name { get; set; }
         public string FullName { get; set; }
         public string Directory { get; set; }
-        public string[] Commands { get; set; }
+        public List<string> Commands { get; set; } = new List<string>();
     }
 }
