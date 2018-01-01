@@ -38,6 +38,12 @@ namespace DotGet.Core.Commands
                 }
             }
 
+            if (sourceInfos.Count == 0)
+            {
+                _logger.LogInformation("No .NET Core tool installed!");
+                return true;
+            }
+
             foreach (var sourceInfo in sourceInfos)
             {
                 consoleTable.AddRow(
@@ -47,7 +53,9 @@ namespace DotGet.Core.Commands
                 );
             }
 
+            _logger.LogInformation($"{sourceInfos.Count} tool(s) installed");
             consoleTable.Write(Format.Alternative);
+
             return true;
         }
     }
