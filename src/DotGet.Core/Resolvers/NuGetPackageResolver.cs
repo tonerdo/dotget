@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
+using System.Xml.Linq;
 
 using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
@@ -40,7 +41,7 @@ namespace DotGet.Core.Resolvers
             options.Add("package", parts[0]);
 
             if (parts.Length > 1)
-                options.Add("version", parts[1]);
+                options.Add("version", parts[1].ToLowerInvariant());
 
             return options;
         }
@@ -49,7 +50,12 @@ namespace DotGet.Core.Resolvers
             => !Source.Contains("/") && !Source.Contains(@"\") && !Source.StartsWith(".");
 
         public override bool CheckInstalled()
-            => Directory.Exists(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]));
+        {
+            if (ResolutionType == ResolutionType.Install)
+                return Directory.Exists(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]));
+
+            return Directory.Exists(Path.Combine(SpecialFolders.Lib, Source));
+        }
 
         public override SourceInfo GetSourceInfo() => _sourceInfo;
 
@@ -74,9 +80,14 @@ namespace DotGet.Core.Resolvers
                 }
             }
 
-            version = version.ToLowerInvariant();
             _sourceInfo.FullName = ResolverOptions["package"] + "@" + version;
             url += package + "/" + version + "/" + package + "." + version + ".nupkg";
+
+            if (ResolutionType == ResolutionType.Update)
+            {
+                if (version == GetInstalledPackageVersion())
+                    return false;
+            }
 
             string nupkg = Path.Combine(Path.GetTempPath(), package + "." + version + ".nupkg");
             string packageDirectory = Path.Combine(SpecialFolders.Lib, package);
@@ -90,19 +101,22 @@ namespace DotGet.Core.Resolvers
                 return false;
             }
 
-            string toolsDirectory = Path.Combine(packageDirectory, "tools");
+            if (ResolutionType == ResolutionType.Update)
+                Directory.Delete(packageDirectory, true);
+
             ZipFile.ExtractToDirectory(nupkg, packageDirectory);
 
+            string toolsDirectory = Path.Combine(packageDirectory, "tools");
             if (!Directory.Exists(toolsDirectory))
                 return false;
-            
+
             string appDirectory = Directory
                                     .GetDirectories(toolsDirectory, "netcoreapp*", SearchOption.TopDirectoryOnly)
                                     .LastOrDefault();
 
             if (appDirectory == null)
                 return false;
-            
+
             var executables = GetExecutableAssemblies(appDirectory);
             foreach (var executable in executables)
                 CreatePlatformExecutable(executable);
@@ -127,6 +141,15 @@ namespace DotGet.Core.Resolvers
                     yield return assembly;
             }
 
+        }
+
+        private string GetInstalledPackageVersion()
+        {
+            string package = ResolverOptions["package"];
+            string xml = File.ReadAllText(Path.Combine(SpecialFolders.Lib, package, $"{package}.nuspec"));
+            XElement root = XDocument.Parse(xml).Root;
+            string @namespace = root.GetDefaultNamespace().NamespaceName;
+            return root.Element(XName.Get("metadata", @namespace)).Element(XName.Get("version", @namespace)).Value;
         }
 
         private void CreatePlatformExecutable(string executable)
