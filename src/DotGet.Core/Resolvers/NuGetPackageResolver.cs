@@ -73,7 +73,6 @@ namespace DotGet.Core.Resolvers
             }
 
             string packageDirectory = Path.Combine(SpecialFolders.Lib, package);
-
             if (ResolutionType == ResolutionType.Update)
                 Directory.Delete(packageDirectory, true);
 
@@ -81,21 +80,21 @@ namespace DotGet.Core.Resolvers
             Stream nupkg = GetNuPkgStream(url);
 
             if (nupkg == null)
-                return false;
+                return Fail($"Could not find nupkg for {package} ({version})");
 
             ZipArchive zipArchive = new ZipArchive(nupkg);
             zipArchive.ExtractToDirectory(packageDirectory);
 
             string toolsDirectory = Path.Combine(packageDirectory, "tools");
             if (!Directory.Exists(toolsDirectory))
-                return false;
+                return Fail($"No executable exists in {package} ({version})");
 
             string appDirectory = Directory
                                     .GetDirectories(toolsDirectory, "netcoreapp*", SearchOption.TopDirectoryOnly)
                                     .LastOrDefault();
 
             if (appDirectory == null)
-                return false;
+                return Fail($"No executable exists in {package} ({version})");
 
             var executables = GetExecutableAssemblies(appDirectory);
             var commands = GetCommands(executables);
@@ -141,6 +140,15 @@ namespace DotGet.Core.Resolvers
             {
                 return false;
             }
+        }
+
+        private bool Fail(string message = "")
+        {
+            Directory.Delete(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]), true);
+            if (message != string.Empty)
+                Logger.LogWarning(message);
+
+            return false;
         }
 
         private Stream GetNuPkgStream(string url)
@@ -222,8 +230,9 @@ namespace DotGet.Core.Resolvers
         private void CreatePlatformExecutable(string executable, string command)
         {
             string contents = string.Empty;
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (isWindows)
             {
                 command += ".cmd";
                 contents = $"dotnet {executable} %*";
@@ -236,7 +245,7 @@ namespace DotGet.Core.Resolvers
             }
 
             File.WriteAllText(Path.Combine(SpecialFolders.Bin, command), contents);
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!isWindows)
             {
                 Process process = new Process();
                 process.StartInfo.FileName = "chmod";
