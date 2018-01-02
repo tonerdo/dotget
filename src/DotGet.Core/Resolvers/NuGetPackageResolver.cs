@@ -47,6 +47,15 @@ namespace DotGet.Core.Resolvers
             return options;
         }
 
+        public override string GetFullSource()
+        {
+            string package = ResolverOptions["package"];
+            if (ResolverOptions.TryGetValue("version", out string version))
+                return $"{package} ({version})";
+            
+            return package;
+        }
+
         public override bool CanResolve()
             => !Source.Contains("/") && !Source.Contains(@"\") && !Source.StartsWith(".");
 
@@ -59,18 +68,29 @@ namespace DotGet.Core.Resolvers
         }
 
         public override bool CheckUpdated()
-            => GetInstalledPackageInfo().Version == GetLatestPackageVersion();
+        {
+            string version = GetAllPackageVersions().Last();
+            ResolverOptions["version"] = version;
+            return GetInstalledPackageInfo().Version == version;
+        }
+
+        public override bool Exists()
+        {
+            string[] versions = GetAllPackageVersions();
+            if (versions == null)
+                return false;
+
+            if (ResolverOptions.TryGetValue("version", out string version))
+                return Array.Exists(versions, v => v == version);
+
+            ResolverOptions["version"] = versions.Last();
+            return true;
+        }
 
         public override bool Resolve()
         {
             string package = ResolverOptions["package"];
-
-            if (!ResolverOptions.TryGetValue("version", out string version))
-            {
-                version = GetLatestPackageVersion();
-                if (version == null)
-                    return false;
-            }
+            string version = ResolverOptions["version"];
 
             string packageDirectory = Path.Combine(SpecialFolders.Lib, package);
             if (ResolutionType == ResolutionType.Update)
@@ -87,14 +107,14 @@ namespace DotGet.Core.Resolvers
 
             string toolsDirectory = Path.Combine(packageDirectory, "tools");
             if (!Directory.Exists(toolsDirectory))
-                return Fail($"No executable exists in {package} ({version})");
+                return Fail($"Executable not found in {package} ({version})");
 
             string appDirectory = Directory
                                     .GetDirectories(toolsDirectory, "netcoreapp*", SearchOption.TopDirectoryOnly)
                                     .LastOrDefault();
 
             if (appDirectory == null)
-                return Fail($"No executable exists in {package} ({version})");
+                return Fail($"Executable not found in {package} ({version})");
 
             var executables = GetExecutableAssemblies(appDirectory);
             var commands = GetCommands(executables);
@@ -153,28 +173,33 @@ namespace DotGet.Core.Resolvers
 
         private Stream GetNuPkgStream(string url)
         {
-            WebRequest webRequest = WebRequest.Create(url);
-            WebResponse webResponse = webRequest.GetResponse();
-            if (((HttpWebResponse)webResponse).StatusCode != HttpStatusCode.OK)
+            try
+            {
+                WebClient webClient = new WebClient();
+                byte[] buffer = webClient.DownloadData(url);
+                return new MemoryStream(buffer);
+            }
+            catch
+            {
                 return null;
-
-            return webResponse.GetResponseStream();
+            }
         }
 
-        private string GetLatestPackageVersion()
+        private string[] GetAllPackageVersions()
         {
             string package = ResolverOptions["package"];
 
-            WebRequest webRequest = WebRequest.Create(_baseUrl + package + "/" + "index.json");
-            WebResponse webResponse = webRequest.GetResponse();
-            if (((HttpWebResponse)webResponse).StatusCode != HttpStatusCode.OK)
+            try
+            {
+                WebClient webClient = new WebClient();
+                string json = webClient.DownloadString(_baseUrl + package + "/" + "index.json");
+                VersionResponse response = JsonConvert.DeserializeObject<VersionResponse>(json);
+                return response.Versions;
+            }
+            catch
+            {
                 return null;
-
-            StreamReader reader = new StreamReader(webResponse.GetResponseStream());
-            string json = reader.ReadToEnd();
-
-            VersionResponse response = JsonConvert.DeserializeObject<VersionResponse>(json);
-            return response.Versions.Last();
+            }
         }
 
         private XElement GetMetadataElement()

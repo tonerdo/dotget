@@ -31,6 +31,9 @@ namespace DotGet.Core.Commands
             if (resolver.CheckInstalled())
                 throw new Exception("Source already installed. Try updating!");
 
+            if (!resolver.Exists())
+                throw new Exception("Source doesn't exist");
+
             if (!resolver.Resolve())
                 throw new Exception("Failed to resolve source");
 

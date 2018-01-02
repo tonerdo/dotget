@@ -25,9 +25,11 @@ namespace DotGet.Core.Resolvers
         }
 
         public abstract ResolverOptions BuildOptions();
+        public abstract string GetFullSource();
         public abstract bool CanResolve();
         public abstract bool CheckInstalled();
         public abstract bool CheckUpdated();
+        public abstract bool Exists();
         public abstract bool Resolve();
         public abstract IEnumerable<string> GetInstalled();
         public abstract bool Remove();
