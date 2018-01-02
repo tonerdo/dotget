@@ -34,13 +34,6 @@ namespace DotGet.Core.Commands
             if (!resolver.Resolve())
                 throw new Exception("Failed to resolve source");
 
-            SourceInfo sourceInfo = resolver.GetSourceInfo();
-            File.WriteAllText
-            (
-                Path.Combine(SpecialFolders.Lib, sourceInfo.Directory, $"{sourceInfo.Name}.info.json"),
-                JsonConvert.SerializeObject(sourceInfo, Formatting.Indented)
-            );
-
             return true;
         }
     }

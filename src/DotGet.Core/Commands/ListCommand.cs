@@ -24,38 +24,6 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            List<SourceInfo> sourceInfos = new List<SourceInfo>();
-            ConsoleTable consoleTable = new ConsoleTable("Name", "Full Name", "Command(s)");
-            DirectoryInfo[] directories = new DirectoryInfo(SpecialFolders.Lib).GetDirectories();
-
-            foreach (var directory in directories)
-            {
-                FileInfo fileInfo = directory.GetFiles("*.info.json", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                if (fileInfo != null)
-                {
-                    string json = File.ReadAllText(fileInfo.FullName);
-                    sourceInfos.Add(JsonConvert.DeserializeObject<SourceInfo>(json));
-                }
-            }
-
-            if (sourceInfos.Count == 0)
-            {
-                _logger.LogInformation("No .NET Core tool installed!");
-                return true;
-            }
-
-            foreach (var sourceInfo in sourceInfos)
-            {
-                consoleTable.AddRow(
-                    sourceInfo.Name,
-                    sourceInfo.FullName,
-                    string.Join(", ", sourceInfo.Commands)
-                );
-            }
-
-            _logger.LogInformation($"{sourceInfos.Count} tool(s) installed");
-            consoleTable.Write(Format.Alternative);
-
             return true;
         }
     }

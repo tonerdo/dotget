@@ -24,14 +24,8 @@ namespace DotGet.Core.Resolvers
         }
 
         private readonly string _baseUrl = "https://api.nuget.org/v3-flatcontainer/";
-        private SourceInfo _sourceInfo;
 
-        public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger) : base(source, resolutionType, logger)
-        {
-            _sourceInfo = new SourceInfo();
-            _sourceInfo.Name = ResolverOptions["package"];
-            _sourceInfo.Directory = ResolverOptions["package"];
-        }
+        public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger) : base(source, resolutionType, logger) { }
 
         public override ResolverOptions BuildOptions()
         {
@@ -57,8 +51,6 @@ namespace DotGet.Core.Resolvers
             return Directory.Exists(Path.Combine(SpecialFolders.Lib, Source));
         }
 
-        public override SourceInfo GetSourceInfo() => _sourceInfo;
-
         public override bool Resolve()
         {
             string url = _baseUrl;
@@ -80,7 +72,6 @@ namespace DotGet.Core.Resolvers
                 }
             }
 
-            _sourceInfo.FullName = ResolverOptions["package"] + "@" + version;
             url += package + "/" + version + "/" + package + "." + version + ".nupkg";
 
             if (ResolutionType == ResolutionType.Update)
@@ -155,7 +146,6 @@ namespace DotGet.Core.Resolvers
         private void CreatePlatformExecutable(string executable)
         {
             string command = Path.GetFileNameWithoutExtension(executable);
-            _sourceInfo.Commands.Add(command);
             string contents = string.Empty;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
