@@ -58,6 +58,9 @@ namespace DotGet.Core.Resolvers
             return Directory.Exists(Path.Combine(SpecialFolders.Lib, Source));
         }
 
+        public override bool CheckUpdated()
+            => GetInstalledPackageInfo().Version == GetLatestPackageVersion();
+
         public override bool Resolve()
         {
             string url = _baseUrl;
