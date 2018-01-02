@@ -17,5 +17,6 @@ namespace DotGet.Core.Resolvers
         }
 
         public Resolver GetResolver() => _resolvers.FirstOrDefault(r => r.CanResolve());
+        public Resolver[] GetAllResolvers() => _resolvers;
     }
 }

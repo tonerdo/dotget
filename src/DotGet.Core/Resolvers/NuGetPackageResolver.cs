@@ -107,6 +107,23 @@ namespace DotGet.Core.Resolvers
             return true;
         }
 
+        public override IEnumerable<string> GetInstalled()
+        {
+            foreach (var directory in new DirectoryInfo(SpecialFolders.Lib).GetDirectories())
+            {
+                FileInfo specFile = directory
+                                    .GetFiles("*.nuspec", SearchOption.TopDirectoryOnly)
+                                    .FirstOrDefault();
+
+                if (specFile != null)
+                {
+                    ResolverOptions["package"] = directory.Name;
+                    NuSpec nuSpec = GetInstalledPackageInfo();
+                    yield return $"{nuSpec.Id} ({nuSpec.Version})";
+                }
+            }
+        }
+
         public override bool Remove()
         {
             NuSpec nuSpec = GetInstalledPackageInfo();

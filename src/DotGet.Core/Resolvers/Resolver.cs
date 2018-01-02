@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
@@ -17,7 +18,10 @@ namespace DotGet.Core.Resolvers
             this.Source = source;
             this.ResolutionType = resolutionType;
             this.Logger = logger;
-            this.ResolverOptions = BuildOptions();
+            if (resolutionType != ResolutionType.None)
+                this.ResolverOptions = BuildOptions();
+            else
+                this.ResolverOptions = new ResolverOptions();
         }
 
         public abstract ResolverOptions BuildOptions();
@@ -25,6 +29,7 @@ namespace DotGet.Core.Resolvers
         public abstract bool CheckInstalled();
         public abstract bool CheckUpdated();
         public abstract bool Resolve();
+        public abstract IEnumerable<string> GetInstalled();
         public abstract bool Remove();
     }
 }
