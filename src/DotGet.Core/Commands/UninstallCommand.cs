@@ -21,11 +21,13 @@ namespace DotGet.Core.Commands
 
         public bool Execute()
         {
-            // TODO: Check all source infos for source name
             ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Remove, _logger);
             Resolver resolver = resolverFactory.GetResolver();
             if (resolver == null)
                 throw new Exception("No resolver found");
+
+            if (!resolver.CheckInstalled())
+                throw new Exception("Source not already installed.");
 
             if (!resolver.Remove())
                 throw new Exception("Failed to remove source");

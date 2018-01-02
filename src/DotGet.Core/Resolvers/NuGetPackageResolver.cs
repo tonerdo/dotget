@@ -109,7 +109,21 @@ namespace DotGet.Core.Resolvers
 
         public override bool Remove()
         {
-            throw new NotImplementedException();
+            NuSpec nuSpec = GetInstalledPackageInfo();
+            string extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".cmd" : "";
+
+            try
+            {
+                foreach (var command in nuSpec.Commands.Split(','))
+                    File.Delete(Path.Combine(SpecialFolders.Bin, command + extension));
+
+                Directory.Delete(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]), true);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private Stream GetNuPkgStream(string url)
@@ -144,7 +158,7 @@ namespace DotGet.Core.Resolvers
             string xml = File.ReadAllText(Path.Combine(SpecialFolders.Lib, package, $"{package}.nuspec"));
             XElement root = XDocument.Parse(xml).Root;
             XNamespace xNamespace = root.GetDefaultNamespace();
-            return root.Element(xNamespace + "metadata"); ;
+            return root.Element(xNamespace + "metadata");
         }
 
         private NuSpec GetInstalledPackageInfo()
