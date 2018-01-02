@@ -39,7 +39,7 @@ namespace DotGet.Core.Resolvers
             ResolverOptions options = new ResolverOptions();
 
             string[] parts = Source.Split('@');
-            options.Add("package", parts[0]);
+            options.Add("package", parts[0].ToLowerInvariant());
 
             if (parts.Length > 1)
                 options.Add("version", parts[1].ToLowerInvariant());
@@ -63,49 +63,28 @@ namespace DotGet.Core.Resolvers
 
         public override bool Resolve()
         {
-            string url = _baseUrl;
-            string package = ResolverOptions["package"].ToLowerInvariant();
-            string version = string.Empty;
-            var webClient = new WebClient();
+            string package = ResolverOptions["package"];
 
-            if (!ResolverOptions.TryGetValue("version", out version))
+            if (!ResolverOptions.TryGetValue("version", out string version))
             {
-                try
-                {
-                    string json = webClient.DownloadString(_baseUrl + package + "/" + "index.json");
-                    VersionResponse response = JsonConvert.DeserializeObject<VersionResponse>(json);
-                    version = response.Versions.Last();
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-
-            url += package + "/" + version + "/" + package + "." + version + ".nupkg";
-
-            if (ResolutionType == ResolutionType.Update)
-            {
-                if (version == GetInstalledPackageInfo().Version)
+                version = GetLatestPackageVersion();
+                if (version == null)
                     return false;
             }
 
-            string nupkg = Path.Combine(Path.GetTempPath(), package + "." + version + ".nupkg");
             string packageDirectory = Path.Combine(SpecialFolders.Lib, package);
-
-            try
-            {
-                webClient.DownloadFile(url, nupkg);
-            }
-            catch
-            {
-                return false;
-            }
 
             if (ResolutionType == ResolutionType.Update)
                 Directory.Delete(packageDirectory, true);
 
-            ZipFile.ExtractToDirectory(nupkg, packageDirectory);
+            string url = _baseUrl + package + "/" + version + "/" + package + "." + version + ".nupkg";
+            Stream nupkg = GetNuPkgStream(url);
+
+            if (nupkg == null)
+                return false;
+
+            ZipArchive zipArchive = new ZipArchive(nupkg);
+            zipArchive.ExtractToDirectory(packageDirectory);
 
             string toolsDirectory = Path.Combine(packageDirectory, "tools");
             if (!Directory.Exists(toolsDirectory))
@@ -131,6 +110,32 @@ namespace DotGet.Core.Resolvers
         public override bool Remove()
         {
             throw new NotImplementedException();
+        }
+
+        private Stream GetNuPkgStream(string url)
+        {
+            WebRequest webRequest = WebRequest.Create(url);
+            WebResponse webResponse = webRequest.GetResponse();
+            if (((HttpWebResponse)webResponse).StatusCode != HttpStatusCode.OK)
+                return null;
+
+            return webResponse.GetResponseStream();
+        }
+
+        private string GetLatestPackageVersion()
+        {
+            string package = ResolverOptions["package"];
+
+            WebRequest webRequest = WebRequest.Create(_baseUrl + package + "/" + "index.json");
+            WebResponse webResponse = webRequest.GetResponse();
+            if (((HttpWebResponse)webResponse).StatusCode != HttpStatusCode.OK)
+                return null;
+
+            StreamReader reader = new StreamReader(webResponse.GetResponseStream());
+            string json = reader.ReadToEnd();
+
+            VersionResponse response = JsonConvert.DeserializeObject<VersionResponse>(json);
+            return response.Versions.Last();
         }
 
         private XElement GetMetadataElement()
