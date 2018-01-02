@@ -23,6 +23,13 @@ namespace DotGet.Core.Resolvers
             public string[] Versions { get; set; }
         }
 
+        private class NuSpec
+        {
+            public string Id { get; set; }
+            public string Version { get; set; }
+            public string Commands { get; set; }
+        }
+
         private readonly string _baseUrl = "https://api.nuget.org/v3-flatcontainer/";
 
         public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger) : base(source, resolutionType, logger) { }
@@ -76,7 +83,7 @@ namespace DotGet.Core.Resolvers
 
             if (ResolutionType == ResolutionType.Update)
             {
-                if (version == GetInstalledPackageVersion())
+                if (version == GetInstalledPackageInfo().Version)
                     return false;
             }
 
@@ -109,9 +116,12 @@ namespace DotGet.Core.Resolvers
                 return false;
 
             var executables = GetExecutableAssemblies(appDirectory);
-            foreach (var executable in executables)
-                CreatePlatformExecutable(executable);
+            var commands = GetCommands(executables);
 
+            for (int i = 0; i < executables.Count(); i++)
+                CreatePlatformExecutable(executables.ElementAt(i), commands.ElementAt(i));
+
+            UpdateInstalledPackageInfo(string.Join(",", commands));
             return true;
         }
 
@@ -120,9 +130,40 @@ namespace DotGet.Core.Resolvers
             throw new NotImplementedException();
         }
 
+        private XElement GetMetadataElement()
+        {
+            string package = ResolverOptions["package"];
+            string xml = File.ReadAllText(Path.Combine(SpecialFolders.Lib, package, $"{package}.nuspec"));
+            XElement root = XDocument.Parse(xml).Root;
+            XNamespace xNamespace = root.GetDefaultNamespace();
+            return root.Element(xNamespace + "metadata"); ;
+        }
+
+        private NuSpec GetInstalledPackageInfo()
+        {
+            XElement metadata = GetMetadataElement();
+            XNamespace xNamespace = metadata.GetDefaultNamespace();
+            return new NuSpec()
+            {
+                Id = metadata.Element(xNamespace + "id")?.Value,
+                Version = metadata.Element(xNamespace + "version")?.Value,
+                Commands = metadata.Element(xNamespace + "commands")?.Value
+            };
+        }
+
+        private void UpdateInstalledPackageInfo(string commands)
+        {
+            string package = ResolverOptions["package"];
+            XElement metadata = GetMetadataElement();
+            XNamespace xNamespace = metadata.GetDefaultNamespace();
+            metadata.Add(
+                new XElement(xNamespace + "commands", commands)
+            );
+            metadata.Document.Save(Path.Combine(SpecialFolders.Lib, package, $"{package}.nuspec"));
+        }
+
         private IEnumerable<string> GetExecutableAssemblies(string appDirectory)
         {
-
             string[] assemblies = Directory.GetFiles(appDirectory, "*.dll", SearchOption.TopDirectoryOnly);
             AssemblyLoadContext assemblyLoadContext = AssemblyLoadContext.Default;
 
@@ -131,21 +172,16 @@ namespace DotGet.Core.Resolvers
                 if (assemblyLoadContext.LoadFromAssemblyPath(assembly).EntryPoint != null)
                     yield return assembly;
             }
-
         }
 
-        private string GetInstalledPackageVersion()
+        private IEnumerable<string> GetCommands(IEnumerable<string> executables)
         {
-            string package = ResolverOptions["package"];
-            string xml = File.ReadAllText(Path.Combine(SpecialFolders.Lib, package, $"{package}.nuspec"));
-            XElement root = XDocument.Parse(xml).Root;
-            string @namespace = root.GetDefaultNamespace().NamespaceName;
-            return root.Element(XName.Get("metadata", @namespace)).Element(XName.Get("version", @namespace)).Value;
+            foreach (var executable in executables)
+                yield return Path.GetFileNameWithoutExtension(executable);
         }
 
-        private void CreatePlatformExecutable(string executable)
+        private void CreatePlatformExecutable(string executable, string command)
         {
-            string command = Path.GetFileNameWithoutExtension(executable);
             string contents = string.Empty;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
