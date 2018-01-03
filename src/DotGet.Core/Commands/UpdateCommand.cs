@@ -27,17 +27,31 @@ namespace DotGet.Core.Commands
             ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Update, _logger);
             Resolver resolver = resolverFactory.GetResolver();
             if (resolver == null)
-                throw new Exception("No resolver found");
+            {
+                _logger.LogError($"No resolver found for {_source}");
+                return false;
+            }
 
             if (!resolver.CheckInstalled())
-                throw new Exception("Source is not already installed.");
+            {
+                _logger.LogError($"{_source} isn't installed");
+                return false;
+            }
 
             if (resolver.CheckUpdated())
-                throw new Exception("Source is already up to date.");
+            {
+                _logger.LogSuccess($"{resolver.GetFullSource()} is up to date!");
+                return true;
+            }
 
+            _logger.LogInformation($"Updating {_source}");
             if (!resolver.Resolve())
-                throw new Exception("Failed to resolve source");
+            {
+                _logger.LogError($"Unable to update {_source}");
+                return false;
+            }
 
+            _logger.LogSuccess($"{_source} updated successfully!");
             return true;
         }
     }

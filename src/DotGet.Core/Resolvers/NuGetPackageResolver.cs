@@ -52,7 +52,7 @@ namespace DotGet.Core.Resolvers
             string package = ResolverOptions["package"];
             if (ResolverOptions.TryGetValue("version", out string version))
                 return $"{package} ({version})";
-            
+
             return package;
         }
 

@@ -34,7 +34,7 @@ namespace DotGet.Core.Commands
             if (resolver.CheckInstalled())
             {
                 _logger.LogWarning($"{resolver.GetFullSource()} is already installed.");
-                return false;
+                return true;
             }
 
             if (!resolver.Exists())
