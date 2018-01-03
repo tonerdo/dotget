@@ -62,7 +62,13 @@ namespace DotGet.Core.Resolvers
         public override bool CheckInstalled()
         {
             if (ResolutionType == ResolutionType.Install)
-                return Directory.Exists(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]));
+            {
+                bool exists = Directory.Exists(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]));
+                if (exists)
+                    ResolverOptions["version"] = GetInstalledPackageInfo().Version;
+
+                return exists;
+            }
 
             return Directory.Exists(Path.Combine(SpecialFolders.Lib, Source));
         }
@@ -107,14 +113,14 @@ namespace DotGet.Core.Resolvers
 
             string toolsDirectory = Path.Combine(packageDirectory, "tools");
             if (!Directory.Exists(toolsDirectory))
-                return Fail($"Executable not found in {package} ({version})");
+                return Fail($"Executable not found for {package} ({version})");
 
             string appDirectory = Directory
                                     .GetDirectories(toolsDirectory, "netcoreapp*", SearchOption.TopDirectoryOnly)
                                     .LastOrDefault();
 
             if (appDirectory == null)
-                return Fail($"Executable not found in {package} ({version})");
+                return Fail($"Executable not found for {package} ({version})");
 
             var executables = GetExecutableAssemblies(appDirectory);
             var commands = GetCommands(executables);

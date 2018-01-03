@@ -26,17 +26,31 @@ namespace DotGet.Core.Commands
             ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Install, _logger);
             Resolver resolver = resolverFactory.GetResolver();
             if (resolver == null)
-                throw new Exception("No resolver found");
+            {
+                _logger.LogError($"No resolver found for {_source}");
+                return false;
+            }
 
             if (resolver.CheckInstalled())
-                throw new Exception("Source already installed. Try updating!");
+            {
+                _logger.LogWarning($"{resolver.GetFullSource()} is already installed.");
+                return false;
+            }
 
             if (!resolver.Exists())
-                throw new Exception("Source doesn't exist");
+            {
+                _logger.LogError($"Unable to find {resolver.GetFullSource()}");
+                return false;
+            }
 
+            _logger.LogInformation($"Installing {resolver.GetFullSource()}");
             if (!resolver.Resolve())
-                throw new Exception("Failed to resolve source");
+            {
+                _logger.LogError($"Unable to resolve {resolver.GetFullSource()}");
+                return false;
+            }
 
+            _logger.LogSuccess($"{resolver.GetFullSource()} installed successfully!");
             return true;
         }
     }
