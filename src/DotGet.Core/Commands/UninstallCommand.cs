@@ -24,14 +24,25 @@ namespace DotGet.Core.Commands
             ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Remove, _logger);
             Resolver resolver = resolverFactory.GetResolver();
             if (resolver == null)
-                throw new Exception("No resolver found");
+            {
+                _logger.LogError($"No resolver found for {_source}");
+                return false;
+            }
 
             if (!resolver.CheckInstalled())
-                throw new Exception("Source not already installed.");
+            {
+                _logger.LogError($"{_source} isn't installed");
+                return false;
+            }
 
+            _logger.LogInformation($"Uninstalling {resolver.GetFullSource()}");
             if (!resolver.Remove())
-                throw new Exception("Failed to remove source");
+            {
+                _logger.LogError($"{_source} couldn't be uninstalled.");
+                return false;
+            }
 
+            _logger.LogSuccess($"{_source} was uninstalled.");
             return true;
         }
     }
