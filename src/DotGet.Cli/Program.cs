@@ -40,17 +40,9 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    logger.LogInformation($"Installing {source.Value}");
 
                     InstallCommand installCommand = new InstallCommand(source.Value, logger);
-                    if (!installCommand.Execute())
-                    {
-                        logger.LogError($"{source.Value} was not installed!");
-                        return 1;
-                    }
-
-                    logger.LogSuccess($"{source.Value} was installed successfully!");
-                    return 0;
+                    return installCommand.Execute() ? 0 : 1;
                 });
             });
 
@@ -70,17 +62,9 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    logger.LogInformation($"Updating {source.Value}");
 
                     UpdateCommand updateCommand = new UpdateCommand(source.Value, logger);
-                    if (!updateCommand.Execute())
-                    {
-                        logger.LogError($"{source.Value} was not updated!");
-                        return 1;
-                    }
-
-                    logger.LogSuccess($"{source.Value} was updated successfully!");
-                    return 0;
+                    return updateCommand.Execute() ? 0 : 1;
                 });
             });
 
@@ -92,8 +76,7 @@ namespace DotGet.Cli
                 c.OnExecute(() =>
                 {
                     ListCommand listCommand = new ListCommand(logger);
-                    listCommand.Execute();
-                    return 0;
+                    return listCommand.Execute() ? 0 : 1;
                 });
             });
 
@@ -113,17 +96,9 @@ namespace DotGet.Cli
                     }
 
                     UpdateLoggerIfVerbose(verboseOption, logger);
-                    logger.LogInformation($"Uninstalling {source.Value}");
 
                     UninstallCommand uninstallCommand = new UninstallCommand(source.Value, logger);
-                    if (!uninstallCommand.Execute())
-                    {
-                        logger.LogError($"{source.Value} failed to uninstall!");
-                        return 1;
-                    }
-
-                    logger.LogSuccess($"{source.Value} was uinstalled!");
-                    return 0;
+                    return uninstallCommand.Execute() ? 0 : 1;
                 });
             });
 
