@@ -33,13 +33,12 @@ namespace DotGet.Cli
 
                 c.OnExecute(() =>
                 {
+                    logger = new Logger(verboseOption.HasValue());
                     if (string.IsNullOrWhiteSpace(source.Value))
                     {
                         logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
-
-                    UpdateLoggerIfVerbose(verboseOption, logger);
 
                     InstallCommand installCommand = new InstallCommand(source.Value, logger);
                     return installCommand.Execute() ? 0 : 1;
@@ -55,13 +54,12 @@ namespace DotGet.Cli
 
                 c.OnExecute(() =>
                 {
+                    logger = new Logger(verboseOption.HasValue());
                     if (string.IsNullOrWhiteSpace(source.Value))
                     {
                         logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
-
-                    UpdateLoggerIfVerbose(verboseOption, logger);
 
                     UpdateCommand updateCommand = new UpdateCommand(source.Value, logger);
                     return updateCommand.Execute() ? 0 : 1;
@@ -75,6 +73,7 @@ namespace DotGet.Cli
 
                 c.OnExecute(() =>
                 {
+                    logger = new Logger(verboseOption.HasValue());
                     ListCommand listCommand = new ListCommand(logger);
                     return listCommand.Execute() ? 0 : 1;
                 });
@@ -89,13 +88,12 @@ namespace DotGet.Cli
 
                 c.OnExecute(() =>
                 {
+                    logger = new Logger(verboseOption.HasValue());
                     if (string.IsNullOrWhiteSpace(source.Value))
                     {
                         logger.LogError("<SOURCE> argument is required. Use -h|--help to see help");
                         return 1;
                     }
-
-                    UpdateLoggerIfVerbose(verboseOption, logger);
 
                     UninstallCommand uninstallCommand = new UninstallCommand(source.Value, logger);
                     return uninstallCommand.Execute() ? 0 : 1;
@@ -112,12 +110,6 @@ namespace DotGet.Cli
                 app.ShowHelp();
                 return 1;
             }
-        }
-
-        static void UpdateLoggerIfVerbose(CommandOption verboseOption, Logger logger)
-        {
-            if (verboseOption.HasValue())
-                logger.AllowVerbose();
         }
     }
 }

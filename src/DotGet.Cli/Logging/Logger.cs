@@ -7,6 +7,14 @@ namespace DotGet.Cli.Logging
     {
         public LogLevel Level { get; set; } = LogLevel.Error | LogLevel.Info | LogLevel.Success | LogLevel.Warning;
 
+        public Logger() { }
+
+        public Logger(bool verbose)
+        {
+            if (verbose)
+                Level = Level | LogLevel.Verbose;
+        }
+
         public void LogError(string message)
         {
             if (Level.HasFlag(LogLevel.Error))
@@ -48,7 +56,5 @@ namespace DotGet.Cli.Logging
                 Console.ResetColor();
             }
         }
-
-        public void AllowVerbose() => Level = Level | LogLevel.Verbose;
     }
 }
