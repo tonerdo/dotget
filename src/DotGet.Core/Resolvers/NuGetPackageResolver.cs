@@ -70,6 +70,13 @@ namespace DotGet.Core.Resolvers
                 return exists;
             }
 
+            if (ResolutionType == ResolutionType.Remove)
+            {
+                bool exists = Directory.Exists(Path.Combine(SpecialFolders.Lib, Source));
+                if (exists)
+                    ResolverOptions["version"] = GetInstalledPackageInfo().Version;
+            }
+
             return Directory.Exists(Path.Combine(SpecialFolders.Lib, Source));
         }
 
@@ -157,13 +164,17 @@ namespace DotGet.Core.Resolvers
             try
             {
                 foreach (var command in nuSpec.Commands.Split(','))
+                {
+                    Logger.LogInformation($"Removing command '{command}'");
                     File.Delete(Path.Combine(SpecialFolders.Bin, command + extension));
+                }
 
                 Directory.Delete(Path.Combine(SpecialFolders.Lib, ResolverOptions["package"]), true);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.LogVerbose(ex.ToString());
                 return false;
             }
         }
@@ -185,8 +196,9 @@ namespace DotGet.Core.Resolvers
                 byte[] buffer = webClient.DownloadData(url);
                 return new MemoryStream(buffer);
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.LogVerbose(ex.ToString());
                 return null;
             }
         }
@@ -202,8 +214,9 @@ namespace DotGet.Core.Resolvers
                 VersionResponse response = JsonConvert.DeserializeObject<VersionResponse>(json);
                 return response.Versions;
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.LogVerbose(ex.ToString());
                 return null;
             }
         }
@@ -263,6 +276,7 @@ namespace DotGet.Core.Resolvers
             string contents = string.Empty;
             bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+            Logger.LogInformation($"Registering command '{command}'");
             if (isWindows)
             {
                 command += ".cmd";
