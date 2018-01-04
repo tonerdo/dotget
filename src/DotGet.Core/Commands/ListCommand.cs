@@ -8,8 +8,6 @@ using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
 
-using Newtonsoft.Json;
-
 namespace DotGet.Core.Commands
 {
     public class ListCommand : ICommand
