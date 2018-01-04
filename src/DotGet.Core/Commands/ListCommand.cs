@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using ConsoleTables;
-
 using DotGet.Core.Configuration;
 using DotGet.Core.Logging;
 using DotGet.Core.Resolvers;
