@@ -280,7 +280,9 @@ namespace DotGet.Core.Resolvers
             if (isWindows)
             {
                 command += ".cmd";
-                contents = $"dotnet {executable} %*";
+                contents = "@echo off";
+                contents += Environment.NewLine;
+                contents += $"dotnet {executable} %*";
             }
             else
             {
