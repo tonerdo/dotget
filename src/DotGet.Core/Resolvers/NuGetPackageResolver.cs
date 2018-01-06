@@ -34,7 +34,7 @@ namespace DotGet.Core.Resolvers
 
         public NuGetPackageResolver(string source, ResolutionType resolutionType, ILogger logger) : base(source, resolutionType, logger) { }
 
-        public override ResolverOptions BuildOptions()
+        protected override ResolverOptions BuildOptions()
         {
             ResolverOptions options = new ResolverOptions();
 
