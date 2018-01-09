@@ -14,7 +14,7 @@ namespace DotGet.Cli
             app.FullName = ".NET Core Tools Global Installer";
             app.Description = "Install and use command line tools built on .NET Core";
             app.HelpOption("-h|--help");
-            app.VersionOption("-v|--version", "1.0.0");
+            app.VersionOption("-v|--version", GetAssemblyVersion());
 
             CommandOption verboseOption = app.Option("--verbose", "Enable verbose output", CommandOptionType.NoValue);
 
@@ -111,5 +111,7 @@ namespace DotGet.Cli
                 return 1;
             }
         }
+
+        static string GetAssemblyVersion() => typeof(Program).Assembly.GetName().Version.ToString();
     }
 }
