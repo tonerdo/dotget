@@ -9,4 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\DotGet.Core\DotGet.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Runners\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
