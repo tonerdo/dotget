@@ -13,23 +13,24 @@ namespace DotGet.Core.Commands
     public class ListCommand : ICommand
     {
         private ILogger _logger;
+        private Resolver[] _resolvers;
 
-        public ListCommand(ILogger logger)
+        public ListCommand(ILogger logger) : this(null, logger) { }
+
+        internal ListCommand(Resolver[] resolvers, ILogger logger)
         {
+            _resolvers = resolvers ?? new ResolverFactory(string.Empty, ResolutionType.None, _logger).GetAllResolvers();
             _logger = logger;
         }
 
         public bool Execute()
         {
-            ResolverFactory resolverFactory = new ResolverFactory(string.Empty, ResolutionType.None, _logger);
-            Resolver[] resolvers = resolverFactory.GetAllResolvers();
-
             int count = 0;
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("Installed tools:");
             stringBuilder.AppendLine();
 
-            foreach (var resolver in resolvers)
+            foreach (var resolver in _resolvers)
             {
                 foreach (var tool in resolver.GetInstalled())
                 {
