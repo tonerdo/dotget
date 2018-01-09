@@ -24,6 +24,8 @@ namespace DotGet.Core.Resolvers
                 this.ResolverOptions = new ResolverOptions();
         }
 
+        internal Resolver() { }
+
         protected abstract ResolverOptions BuildOptions();
         public abstract string GetFullSource();
         public abstract bool CanResolve();
