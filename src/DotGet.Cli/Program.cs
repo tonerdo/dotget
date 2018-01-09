@@ -10,7 +10,7 @@ namespace DotGet.Cli
         {
             Logger logger = new Logger();
             var app = new CommandLineApplication();
-            app.Name = "dotget";
+            app.Name = "dotnet get";
             app.FullName = ".NET Core Tools Global Installer";
             app.Description = "Install and use command line tools built on .NET Core";
             app.HelpOption("-h|--help");
