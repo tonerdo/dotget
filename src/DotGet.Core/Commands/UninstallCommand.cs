@@ -12,31 +12,33 @@ namespace DotGet.Core.Commands
     {
         private string _source;
         private ILogger _logger;
+        private Resolver _resolver;
 
-        public UninstallCommand(string source, ILogger logger)
+        public UninstallCommand(string source, ILogger logger) : this(null, source, logger) { }
+
+        internal UninstallCommand(Resolver resolver, string source, ILogger logger)
         {
             _source = source;
             _logger = logger;
+            _resolver = resolver ?? new ResolverFactory(_source, ResolutionType.Remove, _logger).GetResolver();
         }
 
         public bool Execute()
         {
-            ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Remove, _logger);
-            Resolver resolver = resolverFactory.GetResolver();
-            if (resolver == null)
+            if (_resolver == null)
             {
                 _logger.LogError($"No resolver found for {_source}");
                 return false;
             }
 
-            if (!resolver.CheckInstalled())
+            if (!_resolver.CheckInstalled())
             {
                 _logger.LogError($"{_source} isn't installed");
                 return false;
             }
 
-            _logger.LogInformation($"Uninstalling {resolver.GetFullSource()}");
-            if (!resolver.Remove())
+            _logger.LogInformation($"Uninstalling {_resolver.GetFullSource()}");
+            if (!_resolver.Remove())
             {
                 _logger.LogError($"{_source} couldn't be uninstalled.");
                 return false;
