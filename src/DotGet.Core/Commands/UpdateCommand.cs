@@ -13,37 +13,39 @@ namespace DotGet.Core.Commands
     {
         private string _source;
         private ILogger _logger;
+        private Resolver _resolver;
 
-        public UpdateCommand(string source, ILogger logger)
+        public UpdateCommand(string source, ILogger logger) : this(null, source, logger) { }
+
+        internal UpdateCommand(Resolver resolver, string source, ILogger logger)
         {
             _source = source;
             _logger = logger;
+            _resolver = resolver ?? new ResolverFactory(_source, ResolutionType.Update, _logger).GetResolver();
         }
 
         public bool Execute()
         {
-            ResolverFactory resolverFactory = new ResolverFactory(_source, ResolutionType.Update, _logger);
-            Resolver resolver = resolverFactory.GetResolver();
-            if (resolver == null)
+            if (_resolver == null)
             {
                 _logger.LogError($"No resolver found for {_source}");
                 return false;
             }
 
-            if (!resolver.CheckInstalled())
+            if (!_resolver.CheckInstalled())
             {
                 _logger.LogError($"{_source} isn't installed");
                 return false;
             }
 
-            if (resolver.CheckUpdated())
+            if (_resolver.CheckUpdated())
             {
-                _logger.LogSuccess($"{resolver.GetFullSource()} is up to date!");
+                _logger.LogSuccess($"{_resolver.GetFullSource()} is up to date!");
                 return true;
             }
 
             _logger.LogInformation($"Updating {_source}");
-            if (!resolver.Resolve())
+            if (!_resolver.Resolve())
             {
                 _logger.LogError($"Unable to update {_source}");
                 return false;
