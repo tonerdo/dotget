@@ -14,4 +14,19 @@
   <ItemGroup>
     <Content Include="Runners\**\*" CopyToOutputDirectory="Always" />
   </ItemGroup>
+
+  <Target Name="UpdatePublishDir" AfterTargets="Build">
+    <PropertyGroup>
+      <PublishDir>$(OutputPath)dist</PublishDir>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="CreateReleaseZip" AfterTargets="Publish">
+    <PropertyGroup>
+      <ZipFileName>$(AssemblyTitle.ToLowerInvariant()).v$(AssemblyVersion).zip</ZipFileName>
+      <ZipOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(ZipFileName)</ZipOutputPath>
+    </PropertyGroup>
+    <Exec Condition="$(OS) == 'Windows_NT'" Command="powershell -NoLogo -Command &quot;&amp; Compress-Archive -Path $(MSBuildThisFileDirectory)$(PublishDir) -DestinationPath $(ZipOutputPath) -Force&quot;" />
+  </Target>
+
 </Project>
