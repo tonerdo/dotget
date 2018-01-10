@@ -12,20 +12,20 @@ Install [.NET Core](https://www.microsoft.com/net/download/core)
 
 ### Windows
 
-```bash
+```powershell
 (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/tonerdo/dotget/master/scripts/install.ps1") | iex
 ```
 
 ### Unix
 
-```bash
+```shell
 curl -s https://raw.githubusercontent.com/tonerdo/dotget/master/scripts/install.sh | bash
 ```
 _Note: Ensure that $HOME/.dotget/bin has been added to your path after installation_
 
 ## Usage
 
-```bash
+```shell
 .NET Core Tools Global Installer 1.0.0.0
 
 Usage: dotnet get [options] [command]
