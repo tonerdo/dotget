@@ -193,7 +193,9 @@ namespace DotGet.Core.Resolvers
             try
             {
                 WebClient webClient = new WebClient();
+                Logger.LogVerbose($"GET {url}");
                 byte[] buffer = webClient.DownloadData(url);
+                Logger.LogVerbose($"OK {url}");
                 return new MemoryStream(buffer);
             }
             catch (Exception ex)
@@ -206,11 +208,14 @@ namespace DotGet.Core.Resolvers
         private string[] GetAllPackageVersions()
         {
             string package = ResolverOptions["package"];
+            string url = _baseUrl + package + "/" + "index.json";
 
             try
             {
                 WebClient webClient = new WebClient();
-                string json = webClient.DownloadString(_baseUrl + package + "/" + "index.json");
+                Logger.LogVerbose($"GET {url}");
+                string json = webClient.DownloadString(url);
+                Logger.LogVerbose($"GET {url}");
                 VersionResponse response = JsonConvert.DeserializeObject<VersionResponse>(json);
                 return response.Versions;
             }
