@@ -27,6 +27,7 @@
       <ZipOutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(ZipFileName)</ZipOutputPath>
     </PropertyGroup>
     <Exec Condition="$(OS) == 'Windows_NT'" Command="powershell -NoLogo -Command &quot;&amp; Compress-Archive -Path $(MSBuildThisFileDirectory)$(PublishDir) -DestinationPath $(ZipOutputPath) -Force&quot;" />
+    <Exec Condition="$(OS) != 'Windows_NT'" Command="cd $(MSBuildThisFileDirectory)$(OutputPath) &amp;&amp; zip -r $(ZipOutputPath) dist &amp;&amp; cd -" />
   </Target>
 
 </Project>
