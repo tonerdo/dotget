@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace DotGet.Core.Configuration
 {
-    internal static class SpecialFolders
+    public static class SpecialFolders
     {
         static SpecialFolders()
         {
