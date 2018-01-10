@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 
@@ -9,7 +10,6 @@ using Newtonsoft.Json.Linq;
 using DotGet.Cli.Logging;
 using DotGet.Core.Commands;
 using DotGet.Core.Configuration;
-using System.Diagnostics;
 
 namespace DotGet.Cli
 {
