@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 mkdir /tmp/dotget
 version=$(curl https://api.github.com/repos/tonerdo/dotget/releases/latest | grep -Eo "\"tag_name\":\s*\"(.*)\"" | cut -d'"' -f4)
 
@@ -15,7 +15,7 @@ rm -rf /tmp/dotget
 if grep -q "$HOME/.dotget/bin" ~/.profile
 then
     :
-else    
+else
     echo "" >> ~/.profile
     echo "export PATH=$PATH:$HOME/.dotget/bin" >> ~/.profile
 fi
