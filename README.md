@@ -16,6 +16,8 @@ Install [.NET Core](https://www.microsoft.com/net/download/core)
 
 ### Unix
 
+_Note: Ensure unzip and curl are installed on the system_
+
 ```shell
 curl -s https://raw.githubusercontent.com/tonerdo/dotget/master/scripts/install.sh | bash
 ```
